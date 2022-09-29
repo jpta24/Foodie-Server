@@ -23,10 +23,10 @@ router.post("/signup", (req, res, next) => {
     }
   
     // Check the users collection if a user with the same email already exists
-    User.find({$or:[{username},{email}]})
+    User.find({$or:[{email},{username}]})
       .then((foundUser) => {
         // If the user with the same email already exists, send an error response
-        if (foundUser) {
+        if (foundUser.length !== 0) {
           res.status(400).json({ message: "User already exists." });
           return;
         }
@@ -37,7 +37,7 @@ router.post("/signup", (req, res, next) => {
   
         // Create the new user in the database
         // We return a pending promise, which allows us to chain another `then` 
-        return User.create({ username,password,email,avatarUrl,rol,business });
+        return User.create({ username,password: hashedPassword,email,avatarUrl,rol,business });
       })
       .then((createdUser) => {
         // Deconstruct the newly created user object to omit the password
