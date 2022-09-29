@@ -7,31 +7,23 @@ const User = require('../models/User.model');
 const { isAuthenticated } = require('../middleware/jwt.middleware.js');
 
 router.post("/signup", (req, res, next) => {
-  
     const saltRounds = 10;
-    const {username, password, campus, course} = req.body;
-    if (username === '' || password === '' || campus === '' || course === '') {
-      res.status(400).json({ message: "Provide all fields" });
+
+    const {username,password,email,avatarUrl,rol,business} = req.body;
+    if (username === '' || password === '' || email === '' || avatarUrl === '' || rol === '') {
+      res.status(400).json({ message: "Please provide all fields" });
       return;
     }
-  
-    // Use regex to validate the email format
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    // if (!emailRegex.test(email)) {
-    //   res.status(400).json({ message: 'Provide a valid email address.' });
-    //   return;
-    // }
-    
-    // Use regex to validate the password format
-    // const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
-    // if (!passwordRegex.test(password)) {
-    //   res.status(400).json({ message: 'Password must have at least 6 characters and contain at least one number, one lowercase and one uppercase letter.' });
-    //   return;
-    // }
-  
+    if (password.length < 4) {
+        res.status(400).json({ message: "Password has to be 4  chars min" });
+      return;
+	} 
+    if (rol === 'admin' || rol === 'employee'){
+        rol = `${rol}Pending`
+    }
   
     // Check the users collection if a user with the same email already exists
-    User.findOne({ username })
+    User.find({$or:[{username},{email}]})
       .then((foundUser) => {
         // If the user with the same email already exists, send an error response
         if (foundUser) {
@@ -45,15 +37,15 @@ router.post("/signup", (req, res, next) => {
   
         // Create the new user in the database
         // We return a pending promise, which allows us to chain another `then` 
-        return User.create({ username, password: hashedPassword, campus, course });
+        return User.create({ username,password,email,avatarUrl,rol,business });
       })
       .then((createdUser) => {
         // Deconstruct the newly created user object to omit the password
         // We should never expose passwords publicly
-        const { username, campus, course, _id } = createdUser;
+        const { username,email,avatarUrl,rol,business, _id } = createdUser;
       
         // Create a new object that doesn't expose the password
-        const user = { username, campus, course, _id };
+        const user = { username,email,avatarUrl,rol,business, _id };
   
         // Send a json response containing the user object
         res.status(201).json({ user: user });
@@ -87,10 +79,10 @@ router.post("/login", (req, res, next) => {
 
       if (passwordCorrect) {
         // Deconstruct the user object to omit the password
-        const { username, campus, course, _id } = foundUser;
+        const { username,email,avatarUrl,rol,business,savedBusiness,savedProducts,orders,cart,_id } = foundUser;
         
         // Create an object that will be set as the token payload
-        const payload = { username, campus, course, _id };
+        const payload = { username,email,avatarUrl,rol,business,savedBusiness,savedProducts,orders,cart,_id };
 
         // Create and sign the token
         const authToken = jwt.sign( 

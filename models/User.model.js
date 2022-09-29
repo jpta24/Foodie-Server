@@ -10,6 +10,10 @@ const userSchema = new Schema(
 			type: String,
 			enum: ['developer', 'adminPending','admin', 'employee', 'employeePending', 'user'],
 		},
+    business:{
+      type: Schema.Types.ObjectId,
+      ref: 'Business',
+    },
 		savedBusiness: [
 			{
 				type: Schema.Types.ObjectId,
