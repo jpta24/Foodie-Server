@@ -10,13 +10,22 @@ const businessSchema = new Schema(
             country:String,
         },
         format:{
-            type:String,
-            enum:['delivery','in-place']
-        },
+			delivery:Boolean,
+			pickup: Boolean,
+			inplace: Boolean
+		  },
         categories:[String],
+		type:{
+			prepared:Boolean,
+			packed: Boolean,
+			frozen: Boolean
+		},
         logoUrl:String,
         bgUrl:String,
-        fooding:[String],
+		owner:{
+			type: Schema.Types.ObjectId,
+			ref: 'User',
+		},
         products:[
 			{
 				type: Schema.Types.ObjectId,

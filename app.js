@@ -28,6 +28,9 @@ app.use('/auth', auth);
 const users = require('./routes/users.routes.js');
 app.use('/users', users);
 
+const business = require('./routes/business.routes.js');
+app.use('/business', business);
+
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
 
