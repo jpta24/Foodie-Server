@@ -10,7 +10,7 @@ router.post("/signup", (req, res, next) => {
     const saltRounds = 10;
 
     const {username,password,email,avatarUrl,rol,business} = req.body;
-    if (username === '' || password === '' || email === '' || avatarUrl === '' || rol === '') {
+    if (username === '' || password === '' || email === '' ) {
       res.status(400).json({ message: "Please provide all fields" });
       return;
     }
