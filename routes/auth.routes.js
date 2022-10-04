@@ -8,8 +8,9 @@ const { isAuthenticated } = require('../middleware/jwt.middleware.js');
 
 router.post("/signup", (req, res, next) => {
     const saltRounds = 10;
+    let rol = 'user'
 
-    const {username,password,email,avatarUrl,rol,business} = req.body;
+    const {username,password,email} = req.body;
     if (username === '' || password === '' || email === '' ) {
       res.status(400).json({ message: "Please provide all fields" });
       return;
@@ -18,9 +19,6 @@ router.post("/signup", (req, res, next) => {
         res.status(400).json({ message: "Password has to be 4  chars min" });
       return;
 	} 
-    if (rol === 'admin' || rol === 'employee'){
-        rol = `${rol}Pending`
-    }
   
     // Check the users collection if a user with the same email already exists
     User.find({$or:[{email},{username}]})
@@ -37,15 +35,15 @@ router.post("/signup", (req, res, next) => {
   
         // Create the new user in the database
         // We return a pending promise, which allows us to chain another `then` 
-        return User.create({ username,password: hashedPassword,email,avatarUrl,rol,business });
+        return User.create({ username,password: hashedPassword,email,rol });
       })
       .then((createdUser) => {
         // Deconstruct the newly created user object to omit the password
         // We should never expose passwords publicly
-        const { username,email,avatarUrl,rol,business, _id } = createdUser;
+        const { username,email,rol, _id } = createdUser;
       
         // Create a new object that doesn't expose the password
-        const user = { username,email,avatarUrl,rol,business, _id };
+        const user = { username,email,rol, _id };
   
         // Send a json response containing the user object
         res.status(201).json({ user: user });

@@ -45,7 +45,7 @@ const businessSchema = new Schema(
 				ref: 'User',
 			},
 		],
-        timesSaved:Number
+		timesSaved:Number
 		
 	},
 	{

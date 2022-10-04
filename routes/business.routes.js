@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
 const Business = require('../models/Bussiness.model');
+const User = require('../models/User.model');
 
 
 router.post('/create', (req, res, next) => {
@@ -56,7 +57,14 @@ router.post('/create', (req, res, next) => {
 		});
 	})
     .then(business =>{
-        res.status(201).json({ business:business });
+        User.findByIdAndUpdate(owner,{business:business._id,rol:'admin'},{new:true}).
+        then(() =>{
+            res.status(201).json({ business:business });
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({ message: "Could not Update the user Business" })
+          });
+       
     })
     .catch(err => {
         console.log(err);
