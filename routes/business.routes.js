@@ -4,7 +4,7 @@ const Business = require('../models/Bussiness.model');
 const User = require('../models/User.model');
 
 
-router.post('/create', (req, res, next) => {
+router.post('/', (req, res, next) => {
 	const {
 		name,
 		logoUrl,

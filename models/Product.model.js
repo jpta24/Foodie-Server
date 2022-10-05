@@ -7,7 +7,8 @@ const productSchema = new Schema(
         price:Number,
         mainImg:String,
         otherImg:[String],
-        otherInfo:String,
+        Description:String,
+        type:String,
         timesSaved:Number,
         timesOrdered:Number,
         business:{
