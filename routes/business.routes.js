@@ -72,5 +72,23 @@ router.post('/create', (req, res, next) => {
       });
 });
 
+router.get('/:businessNameEncoded',(req,res,next) =>{
+    const name = req.params.businessNameEncoded.split('-').join(' ')
+
+    Business.findOne({name})
+    .then(business=>{
+        if (business) {
+            res.status(200).json({ business });
+        }else{
+            res.status(400).json({ message: 'Business does not exists.' });
+        }
+    })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+      });
+
+})
+
 
 module.exports = router;
