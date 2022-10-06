@@ -23,14 +23,21 @@ const orderSchema = new Schema(
 			type: String,
 			enum: ['pending','payed','cancelled'],
 		},
+		summary: Number,
         paymentMethod:{
 			type: String,
-			enum: ['PayPal','Credit Card','Cash'],
+			enum: ['pp','card','cash'],
 		},
         format:{
             type:String,
             enum:['delivery','in-place']
-        }
+        },
+		note:{
+			name:String,
+			address:String,
+			note:String,
+			phone: String || Number
+		}
 	},
 	{
 		versionKey: false,
