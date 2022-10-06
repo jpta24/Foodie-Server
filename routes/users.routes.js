@@ -6,9 +6,6 @@ const User = require('../models/User.model');
 router.get('/:userID', (req, res, next) => {
 	User.findById(req.params.userID)
 		.populate('business')
-		.populate('savedBusiness')
-		.populate('savedProducts')
-		.populate('orders')
 		.populate('cart')
 		.then((user) => res.json(user))
 		.catch((err) => next(err));
@@ -18,7 +15,7 @@ router.put('/:userID', (req, res, next) => {
     const userID = req.params.userID
     const {update} = req.body
 
-    if (update === 1) {
+    if (update === 'rol') {
         const {rol, buzname} = req.body
         console.log(rol);
     
@@ -44,6 +41,20 @@ router.put('/:userID', (req, res, next) => {
                 console.log(err)
                 res.status(500).json({ message: "Sorry internal error occurred" })
               });
+    }
+
+    if (update === 'cart') {
+        
+        console.log(update)
+        const {cart} = req.body
+        User.findByIdAndUpdate(userID,{$push:{cart:cart}})
+        .then((user)=>{
+            console.log(user)
+            res.status(200).json(user)})
+        .catch(err => {
+            console.log(err)
+            res.status(500).json({ message: "Sorry internal error occurred" })
+          });
     }
    	
 });

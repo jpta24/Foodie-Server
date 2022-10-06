@@ -75,7 +75,7 @@ router.post('/', (req, res, next) => {
 router.get('/:businessNameEncoded',(req,res,next) =>{
     const name = req.params.businessNameEncoded.split('-').join(' ')
 
-    Business.findOne({name})
+    Business.findOne({name}).populate('products').populate('employees')
     .then(business=>{
         if (business) {
             res.status(200).json({ business });
