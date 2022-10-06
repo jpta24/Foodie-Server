@@ -13,6 +13,19 @@ router.get('/:userID', (req, res, next) => {
             populate: {
               path: "product"
             }
+          })).populate(({
+            path: 'orders',
+            populate: {
+              path: "business"
+            }
+          })).populate(({
+            path: 'orders',
+            populate: {
+              path: "products",
+                populate: {
+                    path: "product"
+                }
+            }
           }))
 		.then((user) => res.json(user))
 		.catch((err) => next(err));

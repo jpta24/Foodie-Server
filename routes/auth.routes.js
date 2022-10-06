@@ -63,7 +63,7 @@ router.post("/login", (req, res, next) => {
   }
 
   // Check the users collection if a user with the same username exists
-  User.findOne({ username }).populate('business').populate('cart')
+  User.findOne({ username }).populate('business').populate('cart').populate('orders')
     .then((foundUser) => {
     
       if (!foundUser) {
