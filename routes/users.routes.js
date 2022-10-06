@@ -17,7 +17,7 @@ router.put('/:userID', (req, res, next) => {
 
     if (update === 'rol') {
         const {rol, buzname} = req.body
-        console.log(rol);
+        // console.log(rol);
     
         Business.findOne({ name:buzname})
             .then((foundBusiness) => {
@@ -45,7 +45,7 @@ router.put('/:userID', (req, res, next) => {
 
     if (update === 'cart') {
         
-        console.log(update)
+        // console.log(update)
         const {cart} = req.body
         User.findByIdAndUpdate(userID,{$push:{cart:cart}})
         .then((user)=>{
