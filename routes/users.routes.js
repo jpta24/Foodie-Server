@@ -104,12 +104,19 @@ router.put('/:userID', (req, res, next) => {
     if(update==='order'){
         const {orders} = req.body
         orders.map(order=>{
+            let orderID ='prev'
             Order.create(order)
             .then(createdOrder=>{
+                console.log({createdOrder});
+                orderID = createdOrder._id
                 return User.findByIdAndUpdate(order.user,{$push:{orders:createdOrder._id}, $set: { cart: [] }})
             }).then(userUpdated=>{
-                res.status(200).json(userUpdated)
-            }).catch(err => {
+                console.log(orderID);
+                return Business.findByIdAndUpdate(order.business,{$push:{orders:orderID}})
+            }).then((updatedBuz)=>{
+                res.status(200).json(updatedBuz)
+            })
+            .catch(err => {
                 console.log(err)
                 res.status(500).json({ message: "Sorry internal error occurred" })
               });

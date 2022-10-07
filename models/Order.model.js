@@ -34,7 +34,7 @@ const orderSchema = new Schema(
         },
 		note:{
 			name:String,
-			address:String,
+			street:String,
 			note:String,
 			phone: String || Number
 		}
