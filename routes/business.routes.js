@@ -3,8 +3,10 @@ const router = require('express').Router();
 const Business = require('../models/Bussiness.model');
 const User = require('../models/User.model');
 
+const { isAuthenticated } = require("../middleware/jwt.middleware");
 
-router.post('/', (req, res, next) => {
+
+router.post('/', isAuthenticated, (req, res, next) => {
 	const {
 		name,
 		logoUrl,
