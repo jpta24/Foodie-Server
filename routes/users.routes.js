@@ -69,31 +69,18 @@ router.put('/:userID', (req, res, next) => {
         const {cart} = req.body
         User.findByIdAndUpdate(userID,{$push:{cart:cart}})
         .then((user)=>{
+            console.log(user)
             res.status(200).json(user)})
         .catch(err => {
             console.log(err)
             res.status(500).json({ message: "Sorry internal error occurred" })
           });
     }
-    //Pending
-    if (update === 'cartQty'){
+    
+    if (update === 'removeCart'){
         const {cart} = req.body
-        
-        console.log(cart.product);
-        User.findById(userID).populate(({
-            path: 'cart',
-            populate: {
-              path: "product"
-            }
-            })).updateOne(
-            {
-                "$set": {'quantity': cart.quantity}
-            },
-            {
-                "arrayFilters": [{'product': cart.product._id}]
-            }
-            ).then((user)=>{
-                console.log(user);
+        User.findByIdAndUpdate(userID,{$pull: { cart: { _id: cart.product }}})
+            .then((user)=>{
                 res.status(200).json(user)})
             .catch(err => {
                 console.log(err)
