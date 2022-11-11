@@ -26,11 +26,11 @@ const orderSchema = new Schema(
 		summary: Number,
         paymentMethod:{
 			type: String,
-			enum: ['pp','card','cash'],
+			enum: ['pp','card','cash','pagoMovil','zelle'],
 		},
         format:{
             type:String,
-            enum:['delivery','in-place']
+            enum:['delivery','inplace','pickup']
         },
 		note:{
 			name:String,

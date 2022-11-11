@@ -105,5 +105,33 @@ router.get('/:businessNameEncoded',(req,res,next) =>{
 
 })
 
+// router.get('/id/:businessID',(req,res,next) =>{
+//     Business.findById(req.params.businessID).populate('products').populate('employees').populate('orders').populate(({
+//         path: 'orders',
+//         populate: {
+//           path: "business"
+//         }
+//       })).populate(({
+//         path: 'orders',
+//         populate: {
+//           path: "products",
+//             populate: {
+//                 path: "product"
+//             }
+//         }
+//       }))
+//     .then(business=>{
+//         if (business) {
+//             res.status(200).json({ business });
+//         }else{
+//             res.status(400).json({ message: 'Business does not exists.' });
+//         }
+//     })
+//     .catch(err => {
+//         console.log(err)
+//         res.status(500).json({ message: "Sorry internal error occurred" })
+//       });
+
+// })
 
 module.exports = router;

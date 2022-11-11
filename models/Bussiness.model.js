@@ -14,6 +14,13 @@ const businessSchema = new Schema(
 			pickup: Boolean,
 			inplace: Boolean
 		  },
+		payment:{
+			cash:Boolean,
+			card: Boolean,
+			pp: Boolean,
+			pagoMovil: Boolean,
+			zelle: Boolean
+		  },
         categories:[String],
 		type:{
 			prepared:Boolean,
