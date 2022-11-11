@@ -11,7 +11,10 @@ router.get('/:userID', (req, res, next) => {
 		.populate(({
             path: 'cart',
             populate: {
-              path: "product"
+              path: "product",
+                populate: {
+                    path:"business"
+                }
             }
           })).populate(({
             path: 'orders',

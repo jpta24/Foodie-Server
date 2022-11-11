@@ -40,6 +40,7 @@ const businessSchema = new Schema(
 			},
 		],
         pdfMenuUrl: String,
+		currency: String,
         orders: [
 			{
 				type: Schema.Types.ObjectId,
