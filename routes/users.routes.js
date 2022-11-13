@@ -92,9 +92,9 @@ router.put('/:userID', (req, res, next) => {
     }
 
     if(update==='order'){
-        const {orders} = req.body
+        const {orders} = req.body;
         orders.map(order=>{
-            let orderID ='prev'
+            let orderID 
             Order.create(order)
             .then(createdOrder=>{
                 console.log({createdOrder});
@@ -113,6 +113,7 @@ router.put('/:userID', (req, res, next) => {
 
         })
     }
+
    	
 });
 

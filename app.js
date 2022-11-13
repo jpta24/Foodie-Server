@@ -36,6 +36,9 @@ app.use('/business', business);
 const products = require('./routes/products.routes.js');
 app.use('/products',isAuthenticated, products);
 
+const orders = require('./routes/orders.routes.js');
+app.use('/orders',isAuthenticated, orders);
+
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
