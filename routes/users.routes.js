@@ -151,9 +151,35 @@ router.put('/addCart/:userID', (req, res, next) => {
     const userID = req.params.userID
 
     const {cart} = req.body
-    User.findByIdAndUpdate(userID,{$push:{cart:cart}})
+    User.findByIdAndUpdate(userID,{$push:{cart:cart}},{new:true})
     .then((user)=>{
-        console.log(user)
+        res.status(200).json(user)})
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+        });
+    
+});
+
+router.put('/addQtyCart/:userID', (req, res, next) => {
+    const userID = req.params.userID
+
+    const {cart} = req.body
+    User.findByIdAndUpdate(userID,{$inc:{'cart.$[elem].quantity':1}},{ arrayFilters: [ { 'elem.product': cart.product } ], new:true },)
+    .then((user)=>{
+        res.status(200).json(user)})
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+        });
+});
+
+router.put('/removeQtyCart/:userID', (req, res, next) => {
+    const userID = req.params.userID
+
+    const {cart} = req.body
+    User.findByIdAndUpdate(userID,{$inc:{'cart.$[elem].quantity':-1}},{ arrayFilters: [ { 'elem.product': cart.product } ], new:true },)
+    .then((user)=>{
         res.status(200).json(user)})
     .catch(err => {
         console.log(err)
