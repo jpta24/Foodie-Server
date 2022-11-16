@@ -85,6 +85,11 @@ router.get('/:businessNameEncoded',(req,res,next) =>{
       })).populate(({
         path: 'orders',
         populate: {
+          path: "user"
+        }
+      })).populate(({
+        path: 'orders',
+        populate: {
           path: "products",
             populate: {
                 path: "product"

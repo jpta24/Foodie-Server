@@ -8,6 +8,8 @@ const businessSchema = new Schema(
             street:String,
             postCode:Number,
             country:String,
+			telephone:String,
+			email:String
         },
         format:{
 			delivery:Boolean,
