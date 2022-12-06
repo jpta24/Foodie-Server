@@ -16,6 +16,7 @@ const productSchema = new Schema(
             ref: 'Business',
         },
         categories:[String],
+        status:String
 	},
 	{
 		versionKey: false,

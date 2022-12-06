@@ -42,6 +42,21 @@ router.post("/", (req, res, next) => {
           });
 });
 
+router.put('/status/:productID', (req, res, next) => {
+    const productID = req.params.productID
+
+    const {status} = req.body
+    Product.findByIdAndUpdate(productID,{status},{new:true})
+    .then((product)=>{
+        console.log(product)
+        res.status(200).json(product)})
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+        });
+    
+});
+
 // You put the next routes here 👇
 // example: router.use("/auth", authRoutes)
 
