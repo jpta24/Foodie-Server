@@ -59,7 +59,7 @@ router.put('/status/:productID', (req, res, next) => {
     
 });
 
-router.put('/edit-product/:productID', (req, res, next) => {
+router.put('/edit/:productID', (req, res, next) => {
     const productID = req.params.productID
 
     const {name,mainImg,description,type,price,ingredients,categories,status} = req.body
@@ -88,6 +88,14 @@ router.get('/:productID',(req,res,next) =>{
         console.log(err)
         res.status(500).json({ message: "Sorry internal error occurred" })
       });
+})
+
+router.delete('/delete/:productID', (req, res) => {
+    const { productID } = req.params;
+
+    Product.findByIdAndRemove(productID)
+        .then(product => res.json({message: `Project with the id ${product._id} was successfully deleted`}))
+        .catch(err => console.log(err))
 })
 
 // You put the next routes here 👇
