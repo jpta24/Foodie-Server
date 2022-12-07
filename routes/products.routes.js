@@ -13,7 +13,8 @@ router.post("/", (req, res, next) => {
         type,
         price,
 		ingredients,
-        categories
+        categories,
+        status
 	} = req.body;
     
     if (name === '' ) {
@@ -29,7 +30,9 @@ router.post("/", (req, res, next) => {
         type,
         price,
 		ingredients,
-        categories})
+        categories,
+        status
+        })
         .then(product =>{
             return Business.findByIdAndUpdate(business,{$push:{products:product._id}},{new:true}) 
         })
@@ -48,7 +51,6 @@ router.put('/status/:productID', (req, res, next) => {
     const {status} = req.body
     Product.findByIdAndUpdate(productID,{status},{new:true})
     .then((product)=>{
-        console.log(product)
         res.status(200).json(product)})
     .catch(err => {
         console.log(err)
@@ -56,6 +58,37 @@ router.put('/status/:productID', (req, res, next) => {
         });
     
 });
+
+router.put('/edit-product/:productID', (req, res, next) => {
+    const productID = req.params.productID
+
+    const {name,mainImg,description,type,price,ingredients,categories,status} = req.body
+    Product.findByIdAndUpdate(productID,{name,mainImg,description,type,price,ingredients,categories,status},{new:true})
+    .then((product)=>{
+        res.status(200).json(product)})
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+        });
+    
+});
+
+router.get('/:productID',(req,res,next) =>{
+    const productID = req.params.productID
+
+    Product.findById(productID).populate('business')
+    .then(product=>{
+        if (product) {
+            res.status(200).json({ product });
+        }else{
+            res.status(400).json({ message: 'Product does not exists.' });
+        }
+    })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+      });
+})
 
 // You put the next routes here 👇
 // example: router.use("/auth", authRoutes)
