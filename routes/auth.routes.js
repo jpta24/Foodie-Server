@@ -11,6 +11,7 @@ router.post("/signup", (req, res, next) => {
     let rol = 'user'
 
     const {username,password,email} = req.body;
+    
     if (username === '' || password === '' || email === '' ) {
       res.status(400).json({ message: "Please provide all fields" });
       return;

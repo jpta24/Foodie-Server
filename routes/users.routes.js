@@ -34,12 +34,6 @@ router.get('/:userID', (req, res, next) => {
 		.catch((err) => next(err));
 });
 
-router.put('/:userID', (req, res, next) => {
-    const userID = req.params.userID
-    const {update} = req.body
-
-});
-
 router.put('/rol/:userID', (req, res, next) => {
     const userID = req.params.userID
 
