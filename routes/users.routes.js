@@ -121,48 +121,98 @@ router.put('/removeCart/:userID', (req, res, next) => {
 router.put('/order/:userID', (req, res, next) => {
     const userID = req.params.userID
     
-    const {orders} = req.body;
-    orders.map(order=>{
-        let orderID 
-        let userUpdated
-        Order.create(order)
-        .then(createdOrder=>{
-            orderID = createdOrder._id
-            return User.findByIdAndUpdate(order.user,{$push:{orders:createdOrder._id}, $set: { cart: [] }},{new:true}).populate('business')
+    const {order} = req.body;
+    Order.create(order)
+    .then(createdOrder=>{ 
+        orderID = createdOrder._id
+        business = createdOrder.business
+        products = createdOrder.products.map(elem=>elem.product._id)
+        return User.findByIdAndUpdate(order.user,{$push:{orders:createdOrder._id}, $pull: { cart: {product:{$in:products}} }},{new:true})
+            .populate('business')
             .populate(({
                 path: 'cart',
                 populate: {
-                  path: "product",
+                path: "product",
                     populate: {
                         path:"business"
                     }
                 }
-              })).populate(({
+            }))
+            .populate(({
                 path: 'orders',
                 populate: {
-                  path: "business"
+                    path: "business"
                 }
-              })).populate(({
+            }))
+            .populate(({
                 path: 'orders',
                 populate: {
-                  path: "products",
+                    path: "products",
                     populate: {
                         path: "product"
                     }
                 }
-              }))
-        }).then(user=>{
-            userUpdated = user
-            return Business.findByIdAndUpdate(order.business,{$push:{orders:orderID}})
-        }).then(()=>{
-            res.status(200).json(userUpdated)
-        })
-        .catch(err => {
-            console.log(err)
-            res.status(500).json({ message: "Sorry internal error occurred" })
-            });
+            }))
+            .then(user=>{
+                
+                userUpdated = user
+                return Business.findByIdAndUpdate(order.business,{$push:{orders:orderID}})
+            }).then(()=>{
+                res.status(200).json(userUpdated)
+            })
+            .catch(err => {
+                console.log(err)
+                res.status(500).json({ message: "Sorry internal error occurred" })
+                });
+            })            
+          
 
-    })
+
+   
+    // const userID = req.params.userID
+    
+    // const {orders} = req.body;
+    // orders.map(order=>{
+    //     let orderID 
+    //     let userUpdated
+    //     Order.create(order)
+    //     .then(createdOrder=>{
+    //         orderID = createdOrder._id
+    //         return User.findByIdAndUpdate(order.user,{$push:{orders:createdOrder._id}, $set: { cart: [] }},{new:true}).populate('business')
+    //         .populate(({
+    //             path: 'cart',
+    //             populate: {
+    //               path: "product",
+    //                 populate: {
+    //                     path:"business"
+    //                 }
+    //             }
+    //           })).populate(({
+    //             path: 'orders',
+    //             populate: {
+    //               path: "business"
+    //             }
+    //           })).populate(({
+    //             path: 'orders',
+    //             populate: {
+    //               path: "products",
+    //                 populate: {
+    //                     path: "product"
+    //                 }
+    //             }
+    //           }))
+    //     }).then(user=>{
+    //         userUpdated = user
+    //         return Business.findByIdAndUpdate(order.business,{$push:{orders:orderID}})
+    //     }).then(()=>{
+    //         res.status(200).json(userUpdated)
+    //     })
+    //     .catch(err => {
+    //         console.log(err)
+    //         res.status(500).json({ message: "Sorry internal error occurred" })
+    //         });
+
+    // })
 });
 
 module.exports = router;
