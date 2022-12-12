@@ -18,7 +18,8 @@ router.post('/', isAuthenticated, (req, res, next) => {
 		pdfMenu,
 		employees,
 		owner,
-    currency
+    currency,
+    payment
 	} = req.body;
 
     if(format.delivery === false && format.pickup === false && format.inplace===false){
@@ -57,7 +58,8 @@ router.post('/', isAuthenticated, (req, res, next) => {
 			pdfMenu,
 			employees,
 			owner,
-      currency
+      currency,
+      payment
 		});
 	})
     .then(business =>{
