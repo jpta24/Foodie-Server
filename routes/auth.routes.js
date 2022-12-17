@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 const User = require('../models/User.model');
 
@@ -45,6 +46,56 @@ router.post("/signup", (req, res, next) => {
       
         // Create a new object that doesn't expose the password
         const user = { username,email,rol, _id };
+
+        // Send email confirmation create an account
+        const transporter = nodemailer.createTransport({
+          service:'gmail',
+          auth: {
+              user: process.env.EMAIL,
+              pass: process.env.PASSMAIL
+          }
+        });
+        let mailCreateAccount = {
+          from: process.env.MAIL,
+          to: user.email,
+          subject: 'You successfully created a Foodie account!',
+          html: `
+          <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
+              <div>
+                  <div style='padding:10px'>
+                      <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
+                          <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
+                          <h1 style='margin-left:15px'>Foodie</h1>
+                      </a>
+                  </div>
+                  <div style='padding:10px'>
+                      <h1 style='margin-top:3px'>Hi ${user.username},</h1>
+                      <p>Welcome to Foodie. </p>
+                      <div>
+                          <div>
+                              <div>
+                                  <hr/>
+                                  <h3>Thanks for signing up for a FREE account.  You can now create a Business to start bring your clients to your online store or you can start buying at Foodies businesses. </h3>
+                                  <p>If you didn't sign up for an account please ignore  this email.  Someone probably made a typo and entered your email address on accident.</p>
+                                  
+                                  <p>Thanks for using our service.</p>
+                                  <h3>Foodie.de</h3>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          `
+          };
+
+          transporter.sendMail(mailCreateAccount , function(error, info){
+              if (error) {
+                console.log(error);
+              } else {
+                console.log('Email Create Account sent: ' + info.response);
+              }
+            });
   
         // Send a json response containing the user object
         res.status(201).json({ user: user });
