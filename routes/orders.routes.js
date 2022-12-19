@@ -34,7 +34,7 @@ router.put("/status/:orderID", (req, res, next) => {
     let mailStatusClient = {
     from: process.env.MAIL,
     to: thisOrder.user.email,
-    subject: `You have ${thisOrder.status} your Foodie Order ${ordNum.slice(10).toUpperCase()}`,
+    subject: `You have ${thisOrder.status.toUpperCase()} your Foodie Order ${ordNum.slice(10).toUpperCase()}`,
     html: `
     <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
         <div>
@@ -46,7 +46,7 @@ router.put("/status/:orderID", (req, res, next) => {
             </div>
             <div style='padding:10px'>
                 <h1 style='margin-top:3px'>Hi ${thisOrder.user.username},</h1>
-                <p>With this mail we would like to let you know that you have <span style='font-weight: bolder'>${thisOrder.status}</span> your order with <span style='font-weight: bolder'>${thisOrder.business.name}</span>.</p>
+                <p>With this mail we would like to let you know that you have <span style='font-weight: bolder'>${thisOrder.status.toUpperCase()}</span> your order with <span style='font-weight: bolder'>${thisOrder.business.name}</span>.</p>
                 <div>
                     <div>
                         <div>
@@ -66,7 +66,7 @@ router.put("/status/:orderID", (req, res, next) => {
                             <hr/>
                             <p>Summary: <span style='font-weight: bolder'>${thisOrder.business.currency} ${thisOrder.summary.toFixed(2)}</span></p>
                             <p>Payment Method: <span style='font-weight: bolder'>${thisOrder.paymentMethod}</span></p>
-                            <p>Order status: <span style='font-weight: bolder'>${thisOrder.status}</span> 
+                            <p>Order status: <span style='font-weight: bolder'>${thisOrder.status.toUpperCase()}</span> 
                             </p>
                             <hr/>
                             <p>We hope to see you again soon.</p>
@@ -92,7 +92,7 @@ router.put("/status/:orderID", (req, res, next) => {
       let mailStatusBusiness = {
         from: process.env.MAIL,
         to: thisOrder.business.address.email,
-        subject: `Client has ${thisOrder.status} your Foodie Order ${ordNum.slice(10).toUpperCase()}`,
+        subject: `Client has ${thisOrder.status.toUpperCase()} your Foodie Order ${ordNum.slice(10).toUpperCase()}`,
         html: `
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
@@ -104,7 +104,7 @@ router.put("/status/:orderID", (req, res, next) => {
                 </div>
                 <div style='padding:10px'>
                     <h1 style='margin-top:3px'>Hi ${thisOrder.business.name},</h1>
-                    <p>With this mail we would like to let you know that <span style='font-weight: bolder'>${thisOrder.user.username}</span> has <span style='font-weight: bolder'>${thisOrder.status}</span> the order.</p>
+                    <p>With this mail we would like to let you know that <span style='font-weight: bolder'>${thisOrder.user.username}</span> has <span style='font-weight: bolder'>${thisOrder.status.toUpperCase()}</span> the order.</p>
                     <div>
                         <div>
                             <div>
@@ -124,7 +124,7 @@ router.put("/status/:orderID", (req, res, next) => {
                                 <hr/>
                                 <p>Summary: <span style='font-weight: bolder'>${thisOrder.business.currency} ${thisOrder.summary.toFixed(2)}</span></p>
                                 <p>Payment Method: <span style='font-weight: bolder'>${thisOrder.paymentMethod}</span></p>
-                                <p>Order status: <span style='font-weight: bolder'>${thisOrder.status}</span> 
+                                <p>Order status: <span style='font-weight: bolder'>${thisOrder.status.toUpperCase()}</span> 
                                 </p>
                                 <hr/>
                                 <p>Thanks for using our service.</p>
@@ -192,6 +192,7 @@ router.put("/statusBusiness/:orderID", (req, res, next) => {
     }))
       .then((updatedOrder)=>{
         const thisOrder = updatedOrder
+        const ordNum = thisOrder._id + ''
         const orders = thisOrder.products.map(eachProduct=>{
           return `<p>
           <span style='padding-left: 5px'>${ eachProduct.quantity + ' ' + eachProduct.product.name}</span><span>${' ' + thisOrder.business.currency} ${(eachProduct.product.price * eachProduct.quantity).toFixed(2)}</span></p>`
@@ -209,7 +210,7 @@ router.put("/statusBusiness/:orderID", (req, res, next) => {
       let mailStatusClient = {
       from: process.env.MAIL,
       to: thisOrder.user.email,
-      subject: `Your Foodie Order ${ordNum.slice(10).toUpperCase()} has been ${thisOrder.status}`,
+      subject: `${thisOrder.business.name} has ${thisOrder.status.toUpperCase()} your Foodie Order ${ordNum.slice(10).toUpperCase()}.`,
       html: `
       <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
           <div>
@@ -221,7 +222,7 @@ router.put("/statusBusiness/:orderID", (req, res, next) => {
               </div>
               <div style='padding:10px'>
                   <h1 style='margin-top:3px'>Hi ${thisOrder.user.username},</h1>
-                  <p>With this mail we would like to let you know that <span style='font-weight: bolder'>${thisOrder.business.name}</span> has <span style='font-weight: bolder'>${thisOrder.status}</span> your Order.</p>
+                  <p>With this mail we would like to let you know that <span style='font-weight: bolder'>${thisOrder.business.name}</span> has <span style='font-weight: bolder'>${thisOrder.status.toUpperCase()}</span> your Order.</p>
                   <div>
                       <div>
                           <div>
@@ -241,7 +242,7 @@ router.put("/statusBusiness/:orderID", (req, res, next) => {
                               <hr/>
                               <p>Summary: <span style='font-weight: bolder'>${thisOrder.business.currency} ${thisOrder.summary.toFixed(2)}</span></p>
                               <p>Payment Method: <span style='font-weight: bolder'>${thisOrder.paymentMethod}</span></p>
-                              <p>Order status: <span style='font-weight: bolder'>${thisOrder.status}</span> 
+                              <p>Order status: <span style='font-weight: bolder'>${thisOrder.status.toUpperCase()}</span> 
                               </p>
                               <hr/>
                               <p>We hope to see you again soon.</p>
@@ -266,8 +267,8 @@ router.put("/statusBusiness/:orderID", (req, res, next) => {
 
         let mailStatusBusiness = {
           from: process.env.MAIL,
-          to: business.address.email,
-          subject: `You have ${thisOrder.status} Order ${ordNum.slice(10).toUpperCase()}`,
+          to: thisOrder.business.address.email,
+          subject: `You have ${thisOrder.status.toUpperCase()} Order ${ordNum.slice(10).toUpperCase()}`,
           html: `
           <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
               <div>
@@ -278,8 +279,8 @@ router.put("/statusBusiness/:orderID", (req, res, next) => {
                       </a>
                   </div>
                   <div style='padding:10px'>
-                      <h1 style='margin-top:3px'>Hi ${business.name},</h1>
-                      <p>With this mail we would like to let you know that you have <span style='font-weight: bolder'>${thisOrder.status}</span> the order from  <span style='font-weight: bolder'>${thisOrder.user.name}</span>.</p>
+                      <h1 style='margin-top:3px'>Hi ${thisOrder.business.name},</h1>
+                      <p>With this mail we would like to let you know that you have <span style='font-weight: bolder'>${thisOrder.status.toUpperCase()}</span> the order from  <span style='font-weight: bolder'>${thisOrder.user.username}</span>.</p>
                       <div>
                           <div>
                               <div>
@@ -297,9 +298,9 @@ router.put("/statusBusiness/:orderID", (req, res, next) => {
                                   ${thisOrder.note.note && `<p>Note: ${thisOrder.note.note}</p>`}
                                   <p>Delivery Service: ${thisOrder.format}</p>
                                   <hr/>
-                                  <p>Summary: <span style='font-weight: bolder'>${business.currency} ${thisOrder.summary.toFixed(2)}</span></p>
+                                  <p>Summary: <span style='font-weight: bolder'>${thisOrder.business.currency} ${thisOrder.summary.toFixed(2)}</span></p>
                                   <p>Payment Method: <span style='font-weight: bolder'>${thisOrder.paymentMethod}</span></p>
-                                  <p>Order status: <span style='font-weight: bolder'>${thisOrder.status}</span> 
+                                  <p>Order status: <span style='font-weight: bolder'>${thisOrder.status.toUpperCase()}</span> 
                                   </p>
                                   <hr/>
                                   <p>Thanks for using our service.</p>

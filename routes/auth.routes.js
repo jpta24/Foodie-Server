@@ -75,7 +75,7 @@ router.post('/signup', (req, res, next) => {
                           <div>
                               <div>
                                   <hr/>
-                                  <h3>Thanks for signing up for a FREE account.  You can now create a Business to start bring your clients to your online store or you can start buying at Foodies businesses. </h3>
+                                  <h3>Thanks for signing up for a FREE account.  You can now create a Business to bring your clients to your online store or you can start buying at Foodies businesses. </h3>
                                   <p>If you didn't sign up for an account please ignore  this email.  Someone probably made a typo and entered your email address on accident.</p>
                                   
                                   <p>Thanks for using our service.</p>
