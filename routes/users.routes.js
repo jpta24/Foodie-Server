@@ -300,6 +300,18 @@ router.put('/order/:userID', (req, res, next) => {
           
 });
 
+router.put('/business/:userID', (req, res, next) => {
+    const userID = req.params.userID
+    const newBuz = req.body
+    User.findByIdAndUpdate(userID,{ $addToSet: { savedBusiness: { $each: newBuz } } })
+    .then(()=>{
+        res.status(200)})
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+        });
+});
+
 router.post('/mail', (req, res, next) => {
     const prueba = mail.otherMail('prueba')
 
