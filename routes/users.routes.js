@@ -32,7 +32,36 @@ router.get('/:userID', (req, res, next) => {
                 }
             }
           }))
-		.then((user) => res.json(user))
+		.then((foundUser) => {
+            const {
+                username,
+                email,
+                avatarUrl,
+                name,
+                phone,
+                rol,
+                business,
+                savedBusiness,
+                savedProducts,
+                orders,
+                cart,
+                _id,
+            } = foundUser
+            const user = {
+                username,
+                email,
+                avatarUrl,
+                name,
+                phone,
+                rol,
+                business,
+                savedBusiness,
+                savedProducts,
+                orders,
+                cart,
+                _id,
+            }
+            res.json(user)})
 		.catch((err) => next(err));
 });
 
@@ -303,9 +332,37 @@ router.put('/order/:userID', (req, res, next) => {
 router.put('/business/:userID', (req, res, next) => {
     const userID = req.params.userID
     const newBuz = req.body
-    User.findByIdAndUpdate(userID,{ $addToSet: { savedBusiness: { $each: newBuz } } })
-    .then(()=>{
-        res.status(200)})
+    User.findByIdAndUpdate(userID,{ $addToSet: { savedBusiness: { $each: newBuz } } }).populate('savedBusiness').populate('business')
+    .then((foundUser)=>{
+        const {
+            username,
+            email,
+            avatarUrl,
+            name,
+            phone,
+            rol,
+            business,
+            savedBusiness,
+            savedProducts,
+            orders,
+            cart,
+            _id,
+        } = foundUser
+        const user = {
+            username,
+            email,
+            avatarUrl,
+            name,
+            phone,
+            rol,
+            business,
+            savedBusiness,
+            savedProducts,
+            orders,
+            cart,
+            _id,
+        }
+        res.status(200).json(user)})
     .catch(err => {
         console.log(err)
         res.status(500).json({ message: "Sorry internal error occurred" })
