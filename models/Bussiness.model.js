@@ -12,16 +12,32 @@ const businessSchema = new Schema(
 			email:String
         },
         format:{
-			delivery:Boolean,
+			delivery:{
+				delivery:Boolean,
+				price:Number
+			},
 			pickup: Boolean,
 			inplace: Boolean
 		  },
 		payment:{
-			cash:Boolean,
-			card: Boolean,
-			pp: Boolean,
-			pagoMovil: Boolean,
-			zelle: Boolean
+			cash:{
+				accepted:Boolean
+			},
+			card: {
+				accepted:Boolean
+			},
+			pp: {
+				accepted:Boolean,
+				email:String
+			},
+			pagoMovil: {
+				accepted:Boolean,
+				ci:String
+			},
+			zelle: {
+				accepted:Boolean,
+				email:String
+			}
 		  },
         categories:[String],
 		type:{
