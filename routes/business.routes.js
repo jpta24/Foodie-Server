@@ -167,5 +167,34 @@ router.get('/:businessNameEncoded',(req,res,next) =>{
 
 })
 
+router.put('/edit/:businessNameEncoded', (req, res, next) => {
+  const buzName = req.params.businessNameEncoded.split('-').join(' ')
+  
+  const {name,logoUrl,address,type,categories,bgUrl,pdfMenu,employees,owner,currency,payment,format} = req.body
+  
+  Business.findOneAndUpdate(
+    {name:buzName},
+    {name,logoUrl,address,type,categories,bgUrl,pdfMenu,employees,owner,currency,payment,format},
+    {new:true}
+    )
+  .then((business)=>{
+      res.status(200).json(business)}) 
+  .catch(err => {
+      console.log(err)
+      res.status(500).json({ message: "Sorry internal error occurred" })
+      });
+  
+});
+
+router.delete('/delete/:businessID', (req, res) => {
+  const { businessID } = req.params;
+
+  Business.findByIdAndRemove(businessID)
+  .then((business)=>{
+      return User.findByIdAndUpdate(business.owner._id,{ $unset: { business:''}})
+  .then((user)=>{res.json({message: `Business with the id ${business._id} was successfully deleted and updated the user`})}
+  )})
+  .catch(err => console.log(err))
+})
 
 module.exports = router;

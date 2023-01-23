@@ -94,7 +94,8 @@ router.delete('/delete/:productID', (req, res) => {
     const { productID } = req.params;
 
     Product.findByIdAndRemove(productID)
-        .then(product => res.json({message: `Project with the id ${product._id} was successfully deleted`}))
+        .then(product => {
+            res.json({message: `Project with the id ${product._id} was successfully deleted`})})
         .catch(err => console.log(err))
 })
 
