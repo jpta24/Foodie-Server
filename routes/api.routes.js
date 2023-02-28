@@ -15,13 +15,5 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
     res.json({ fileUrl: req.file.path });
   });
 
-// router.put("/users", (req, res, next) => {
-//     const {image} = req.body;
-
-// });
-
-// router.get("/users", (req, res, next) => {
-//     res.send('working too')
-// });
 
 module.exports = router;
