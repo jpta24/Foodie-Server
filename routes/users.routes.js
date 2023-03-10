@@ -33,33 +33,9 @@ router.get('/:userID', (req, res, next) => {
             }
           }))
 		.then((foundUser) => {
-            const {
-                username,
-                email,
-                avatarUrl,
-                name,
-                phone,
-                rol,
-                business,
-                savedBusiness,
-                savedProducts,
-                orders,
-                cart,
-                _id,
+            const {username,email,avatarUrl,name,phone,rol,business,savedBusiness,savedProducts,orders,cart,_id,
             } = foundUser
-            const user = {
-                username,
-                email,
-                avatarUrl,
-                name,
-                phone,
-                rol,
-                business,
-                savedBusiness,
-                savedProducts,
-                orders,
-                cart,
-                _id,
+            const user = {username,email,avatarUrl,name,phone,rol,business,savedBusiness,savedProducts,orders,cart,_id,
             }
             res.json(user)})
 		.catch((err) => next(err));
@@ -334,33 +310,9 @@ router.put('/business/:userID', (req, res, next) => {
     const newBuz = req.body
     User.findByIdAndUpdate(userID,{ $addToSet: { savedBusiness: { $each: newBuz } } }).populate('savedBusiness').populate('business')
     .then((foundUser)=>{
-        const {
-            username,
-            email,
-            avatarUrl,
-            name,
-            phone,
-            rol,
-            business,
-            savedBusiness,
-            savedProducts,
-            orders,
-            cart,
-            _id,
+        const {username,email,avatarUrl,name,phone,rol,business,savedBusiness,savedProducts,orders,cart,_id,
         } = foundUser
-        const user = {
-            username,
-            email,
-            avatarUrl,
-            name,
-            phone,
-            rol,
-            business,
-            savedBusiness,
-            savedProducts,
-            orders,
-            cart,
-            _id,
+        const user = {username,email,avatarUrl,name,phone,rol,business,savedBusiness,savedProducts,orders,cart,_id,
         }
         res.status(200).json(user)})
     .catch(err => {
@@ -368,6 +320,34 @@ router.put('/business/:userID', (req, res, next) => {
         res.status(500).json({ message: "Sorry internal error occurred" })
         });
 });
+
+router.put('/language/:userID', (req, res, next) => {
+    const userID = req.params.userID
+    const lang = req.body
+
+    User.findByIdAndUpdate(userID,{ lang:lang.lang })
+    .then((user)=>{
+        res.status(200).json(user)})
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+        });
+    }
+)
+
+router.get('/language/:userID', (req, res, next) => {
+    const userID = req.params.userID
+
+    User.findById(userID)
+    .then((user)=>{
+        const lang = user.lang
+        res.status(200).json({lang})})
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+        });
+    }
+)
 
 router.post('/mail', (req, res, next) => {
     const prueba = mail.otherMail('prueba')

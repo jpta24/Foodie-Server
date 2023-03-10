@@ -11,7 +11,7 @@ router.post('/signup', (req, res, next) => {
 	const saltRounds = 10;
 	let rol = 'user';
 
-	const { username, password, email } = req.body;
+	const { username, password, email, lang } = req.body;
 
 	if (username === '' || password === '' || email === '') {
 		res.status(400).json({ message: 'Please provide all fields' });
@@ -37,7 +37,7 @@ router.post('/signup', (req, res, next) => {
 
 			// Create the new user in the database
 			// We return a pending promise, which allows us to chain another `then`
-			return User.create({ username, password: hashedPassword, email, rol });
+			return User.create({ username, password: hashedPassword, email, rol, lang });
 		})
 		.then((createdUser) => {
 			// Deconstruct the newly created user object to omit the password
