@@ -349,6 +349,20 @@ router.get('/language/:userID', (req, res, next) => {
     }
 )
 
+router.put('/edit-profile/:userID', (req, res, next) => {
+    const userID = req.params.userID
+    
+    const { name,phone,avatarUrl}= req.body
+
+    User.findByIdAndUpdate(userID,{ name,phone,avatarUrl })
+    .then((user)=>{
+        res.status(200).json(user)})
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+        });
+})
+
 router.post('/mail', (req, res, next) => {
     const prueba = mail.otherMail('prueba')
 
