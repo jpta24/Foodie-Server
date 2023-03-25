@@ -1,11 +1,10 @@
 const router = require('express').Router();
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 
 const Business = require('../models/Bussiness.model');
 const User = require('../models/User.model');
 
-const { isAuthenticated } = require("../middleware/jwt.middleware");
-
+const { isAuthenticated } = require('../middleware/jwt.middleware');
 
 router.post('/', isAuthenticated, (req, res, next) => {
 	const {
@@ -19,67 +18,98 @@ router.post('/', isAuthenticated, (req, res, next) => {
 		pdfMenu,
 		employees,
 		owner,
-    currency,
-    payment
+		currency,
+		payment,
+		membership: preMembership,
 	} = req.body;
 
-    if(format.delivery === false && format.pickup === false && format.inplace===false){
-        res.status(400).json({ message: "Please select at least one delivery format" });
-        return;
-    }
+	if (
+		format.delivery === false &&
+		format.pickup === false &&
+		format.inplace === false
+	) {
+		res
+			.status(400)
+			.json({ message: 'Please select at least one delivery format' });
+		return;
+	}
 
-    if (type.prepared === false && type.packed === false && type.frozen===false){
-        res.status(400).json({ message: "Please select at least one Product Type" });
-        return;
-    }
-    if (categories.length===0){
-        res.status(400).json({ message: "Please select at least one Catalog Category" });
-        return;
-    }
+	if (
+		type.prepared === false &&
+		type.packed === false &&
+		type.frozen === false
+	) {
+		res
+			.status(400)
+			.json({ message: 'Please select at least one Product Type' });
+		return;
+	}
+	if (categories.length === 0) {
+		res
+			.status(400)
+			.json({ message: 'Please select at least one Catalog Category' });
+		return;
+	}
 
-    if (name === '' || address.street === '' || address.city === '' || address.country === '' ) {
-        res.status(400).json({ message: "Provide a correct Name and Address " });
-        return;
-      }
+	if (
+		name === '' ||
+		address.street === '' ||
+		address.city === '' ||
+		address.country === ''
+	) {
+		res.status(400).json({ message: 'Provide a correct Name and Address ' });
+		return;
+	}
+	const membership = {
+		plan: preMembership,
+		usedTrial: preMembership === 'trial' ? true : false,
+		updated: new Date(),
+	};
 
-	Business.findOne({ name }).then((foundBusiness) => {
-		if (foundBusiness) {
-			res.status(400).json({ message: 'Business already exists.' });
-			return;
-		}
-        
-		return Business.create({
-			name,
-			logoUrl,
-			address,
-			format,
-			type,
-			categories,
-			bgUrl,
-			pdfMenu,
-			employees,
-			owner,
-      currency,
-      payment
-		});
-	})
-    .then(business =>{
-        User.findByIdAndUpdate(owner,{business:business._id,rol:'admin'},{new:true}).
-        then((userUpdated) =>{
-          const user = userUpdated
-          // Send email confirmation create a Business
-        const transporter = nodemailer.createTransport({
-          service:'gmail',
-          auth: {
-              user: process.env.EMAIL,
-              pass: process.env.PASSMAIL
-          }
-        });
-        let mailCreateBusiness = {
-          from: process.env.MAIL,
-          to: address.email,
-          subject: 'You successfully created a Foodie Business account!',
-          html: `
+	Business.findOne({ name })
+		.then((foundBusiness) => {
+			if (foundBusiness) {
+				res.status(400).json({ message: 'Business already exists.' });
+				return;
+			}
+
+			return Business.create({
+				name,
+				logoUrl,
+				address,
+				format,
+				type,
+				categories,
+				bgUrl,
+				pdfMenu,
+				employees,
+				owner,
+				currency,
+				payment,
+				membership,
+			});
+		})
+		.then((business) => {
+			User.findByIdAndUpdate(
+				owner,
+				{ business: business._id, rol: 'admin' },
+				{ new: true }
+			)
+				.then((userUpdated) => {
+					const user = userUpdated;
+					// Send email confirmation create a Business
+					const transporter = nodemailer.createTransport({
+						service: 'gmail',
+						auth: {
+							user: process.env.EMAIL,
+							pass: process.env.PASSMAIL,
+						},
+					});
+					let mailCreateBusiness = {
+						from: process.env.MAIL,
+						to: address.email,
+						subject: 'You successfully created a Foodie Business account!',
+						html: `
           <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
               <div>
                   <div style='padding:10px'>
@@ -107,135 +137,175 @@ router.post('/', isAuthenticated, (req, res, next) => {
                   </div>
               </div>
           </div>
-          `
-          };
+          `,
+					};
 
-          transporter.sendMail(mailCreateBusiness , function(error, info){
-              if (error) {
-                console.log(error);
-              } else {
-                console.log('Email Create Business Account sent: ' + info.response);
-              }
-            });
+					transporter.sendMail(mailCreateBusiness, function (error, info) {
+						if (error) {
+							console.log(error);
+						} else {
+							console.log(
+								'Email Create Business Account sent: ' + info.response
+							);
+						}
+					});
 
-            res.status(201).json({ business:business });
-        }).catch(err => {
-            console.log(err);
-            res.status(500).json({ message: "Could not Update the user Business" })
-          });
-       
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({ message: "Could not create the Business, check data and try again" })
-      });
+					res.status(201).json({ business: business });
+				})
+				.catch((err) => {
+					console.log(err);
+					res
+						.status(500)
+						.json({ message: 'Could not Update the user Business' });
+				});
+		})
+		.catch((err) => {
+			console.log(err);
+			res
+				.status(500)
+				.json({
+					message: 'Could not create the Business, check data and try again',
+				});
+		});
 });
 
-router.get('/:businessNameEncoded',(req,res,next) =>{
-    const name = req.params.businessNameEncoded.split('-').join(' ')
+router.get('/:businessNameEncoded', (req, res, next) => {
+	const name = req.params.businessNameEncoded.split('-').join(' ');
 
-    Business.findOne({name}).populate('products').populate('employees').populate('orders').populate(({
-        path: 'orders',
-        populate: {
-          path: "business"
-        }
-      })).populate(({
-        path: 'orders',
-        populate: {
-          path: "user"
-        }
-      })).populate(({
-        path: 'orders',
-        populate: {
-          path: "products",
-            populate: {
-                path: "product"
-            }
-        }
-      }))
-    .then(business=>{
-        if (business) {
-            res.status(200).json({ business });
-        }else{
-            res.status(400).json({ message: 'Business does not exists.' });
-        }
-    })
-    .catch(err => {
-        console.log(err)
-        res.status(500).json({ message: "Sorry internal error occurred" })
-      });
-
-})
+	Business.findOne({ name })
+		.populate('products')
+		.populate('employees')
+		.populate('orders')
+		.populate({
+			path: 'orders',
+			populate: {
+				path: 'business',
+			},
+		})
+		.populate({
+			path: 'orders',
+			populate: {
+				path: 'user',
+			},
+		})
+		.populate({
+			path: 'orders',
+			populate: {
+				path: 'products',
+				populate: {
+					path: 'product',
+				},
+			},
+		})
+		.then((business) => {
+			if (business) {
+				res.status(200).json({ business });
+			} else {
+				res.status(400).json({ message: 'Business does not exists.' });
+			}
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
 
 router.put('/edit/:businessNameEncoded', (req, res, next) => {
-  const buzName = req.params.businessNameEncoded.split('-').join(' ')
-  
-  const {name,logoUrl,address,type,categories,bgUrl,pdfMenu,employees,owner,currency,payment,format} = req.body
-  
-  Business.findOneAndUpdate(
-    {name:buzName},
-    {name,logoUrl,address,type,categories,bgUrl,pdfMenu,employees,owner,currency,payment,format},
-    {new:true}
-    )
-  .then((business)=>{
-      res.status(200).json(business)}) 
-  .catch(err => {
-      console.log(err)
-      res.status(500).json({ message: "Sorry internal error occurred" })
-      });
-  
+	const buzName = req.params.businessNameEncoded.split('-').join(' ');
+
+	const {
+		name,
+		logoUrl,
+		address,
+		type,
+		categories,
+		bgUrl,
+		pdfMenu,
+		employees,
+		owner,
+		currency,
+		payment,
+		format,
+	} = req.body;
+
+	Business.findOneAndUpdate(
+		{ name: buzName },
+		{
+			name,
+			logoUrl,
+			address,
+			type,
+			categories,
+			bgUrl,
+			pdfMenu,
+			employees,
+			owner,
+			currency,
+			payment,
+			format,
+		},
+		{ new: true }
+	)
+		.then((business) => {
+			res.status(200).json(business);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
 });
 
 router.delete('/delete/:businessID', (req, res) => {
-  const { businessID } = req.params;
+	const { businessID } = req.params;
 
-  Business.findByIdAndRemove(businessID)
-  .then((business)=>{
-      return User.findByIdAndUpdate(business.owner._id,{ $unset: { business:''}})
-  .then((user)=>{res.json({message: `Business with the id ${business._id} was successfully deleted and updated the user`})}
-  )})
-  .catch(err => console.log(err))
-})
+	Business.findByIdAndRemove(businessID)
+		.then((business) => {
+			return User.findByIdAndUpdate(business.owner._id, {
+				$unset: { business: '' },
+			}).then((user) => {
+				res.json({
+					message: `Business with the id ${business._id} was successfully deleted and updated the user`,
+				});
+			});
+		})
+		.catch((err) => console.log(err));
+});
 
 router.get('/membership/:businessNameEncoded', (req, res, next) => {
-  const buzName = req.params.businessNameEncoded.split('-').join(' ')
-  
-  Business.findOne({name:buzName})
-  .then((business)=>{
-    const {owner,membership} = business
-      res.status(200).json({owner,membership})}) 
-  .catch(err => {
-      console.log(err)
-      res.status(500).json({ message: "Sorry internal error occurred" })
-      });
-  
+	const buzName = req.params.businessNameEncoded.split('-').join(' ');
+
+	Business.findOne({ name: buzName })
+		.then((business) => {
+			const { owner, membership } = business;
+			res.status(200).json({ owner, membership });
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
 });
 
 router.put('/membership/:businessNameEncoded', (req, res, next) => {
-  const buzName = req.params.businessNameEncoded.split('-').join(' ')
-  
-  const {selectedPlan,usedTrial} = req.body
+	const buzName = req.params.businessNameEncoded.split('-').join(' ');
 
-  const newTrialStatus = (usedTrial || selectedPlan ==='trial') ?  true : false
+	const { selectedPlan, usedTrial } = req.body;
 
-  const membership = {
-    plan:selectedPlan,
-    updated: new Date(),
-    usedTrial: newTrialStatus
-  }
-  
-  Business.findOneAndUpdate(
-    {name:buzName},
-    {membership},
-    {new:true}
-    )
-  .then((business)=>{
-      res.status(200).json(business)}) 
-  .catch(err => {
-      console.log(err)
-      res.status(500).json({ message: "Sorry internal error occurred" })
-      });
-  
+	const newTrialStatus = usedTrial || selectedPlan === 'trial' ? true : false;
+
+	const membership = {
+		plan: selectedPlan,
+		updated: new Date(),
+		usedTrial: newTrialStatus,
+	};
+
+	Business.findOneAndUpdate({ name: buzName }, { membership }, { new: true })
+		.then((business) => {
+			res.status(200).json(business);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
 });
 
 module.exports = router;
