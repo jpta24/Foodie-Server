@@ -197,4 +197,45 @@ router.delete('/delete/:businessID', (req, res) => {
   .catch(err => console.log(err))
 })
 
+router.get('/membership/:businessNameEncoded', (req, res, next) => {
+  const buzName = req.params.businessNameEncoded.split('-').join(' ')
+  
+  Business.findOne({name:buzName})
+  .then((business)=>{
+    const {owner,membership} = business
+      res.status(200).json({owner,membership})}) 
+  .catch(err => {
+      console.log(err)
+      res.status(500).json({ message: "Sorry internal error occurred" })
+      });
+  
+});
+
+router.put('/membership/:businessNameEncoded', (req, res, next) => {
+  const buzName = req.params.businessNameEncoded.split('-').join(' ')
+  
+  const {selectedPlan,usedTrial} = req.body
+
+  const newTrialStatus = (usedTrial || selectedPlan ==='trial') ?  true : false
+
+  const membership = {
+    plan:selectedPlan,
+    updated: new Date(),
+    usedTrial: newTrialStatus
+  }
+  
+  Business.findOneAndUpdate(
+    {name:buzName},
+    {membership},
+    {new:true}
+    )
+  .then((business)=>{
+      res.status(200).json(business)}) 
+  .catch(err => {
+      console.log(err)
+      res.status(500).json({ message: "Sorry internal error occurred" })
+      });
+  
+});
+
 module.exports = router;

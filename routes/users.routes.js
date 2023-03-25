@@ -349,6 +349,21 @@ router.get('/language/:userID', (req, res, next) => {
     }
 )
 
+router.get('/home/:userID', (req, res, next) => {
+    const userID = req.params.userID
+
+    User.findById(userID).populate('business')
+    .then((userFound)=>{
+        const membership = userFound.business ? userFound.business.membership : undefined
+        const name = userFound.business ? userFound.business.name : undefined
+        res.status(200).json( {membership,name})})
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({ message: "Sorry internal error occurred" })
+        });
+    }
+)
+
 router.put('/edit-profile/:userID', (req, res, next) => {
     const userID = req.params.userID
     
