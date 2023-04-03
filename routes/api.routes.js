@@ -1,19 +1,29 @@
 const router = require("express").Router();
+const cloudinary = require("cloudinary").v2;
 
 // ********* require fileUploader in order to use it *********
 const fileUploader = require("../config/cloudinary.config");
 
-// POST "/api/upload" => Route that receives the image, sends it to Cloudinary via the fileUploader and returns the image URL
-router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
-    // console.log("file is: ", req.file)
-    if (!req.file) {
-      next(new Error("No file uploaded!"));
-      return;
+router.post("/upload", fileUploader.single("imageUrl"), async (req, res, next) => {
+  try {
+    const { currentImg } = req.body;
+    if (currentImg !== "null") {
+      const publicId = 'foodie-gallery/' + currentImg.substring(
+        currentImg.lastIndexOf("/") + 1,
+        currentImg.lastIndexOf(".")
+      );
+      const done = await cloudinary.uploader.destroy(publicId);
     }
-    // Get the URL of the uploaded file and send it as a response.
-    // 'fileUrl' can be any name, just make sure you remember to use the same when accessing it on the frontend
+
+    if (!req.file) {
+      throw new Error("No file uploaded!");
+    }
+
     res.json({ fileUrl: req.file.path });
-  });
+  } catch (error) {
+    next(error);
+  }
+});
 
 
 module.exports = router;
