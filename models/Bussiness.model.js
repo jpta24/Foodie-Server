@@ -57,6 +57,13 @@ const businessSchema = new Schema(
 				ref: 'Product',
 			},
 		],
+		highlightedProducts: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Product',
+				default: []
+			},
+		],
 		pdfMenuUrl: String,
 		membership: {
 			plan: {
