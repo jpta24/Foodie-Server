@@ -308,4 +308,108 @@ router.put('/membership/:businessNameEncoded', (req, res, next) => {
 		});
 });
 
+router.put('/highlightedProducts/:businessID', (req, res, next) => {
+	const businessID = req.params.businessID;
+	const { productID } = req.body;
+
+	Business.findById(businessID)
+		.then((businessFound) => {
+			if (businessFound.highlightedProducts === undefined){
+				return Business.findByIdAndUpdate(
+					businessID,
+					{ $push: { highlightedProducts: productID } },
+					{ new: true }
+				).populate('products')
+				.populate('employees')
+				.populate('orders')
+				.populate({
+					path: 'orders',
+					populate: {
+						path: 'business',
+					},
+				})
+				.populate({
+					path: 'orders',
+					populate: {
+						path: 'user',
+					},
+				})
+				.populate({
+					path: 'orders',
+					populate: {
+						path: 'products',
+						populate: {
+							path: 'product',
+						},
+					},
+				})
+			} else if (businessFound.highlightedProducts.includes(productID)) {
+				return Business.findByIdAndUpdate(
+					businessID,
+					{ $pull: { highlightedProducts: productID } },
+					{ new: true }
+				).populate('products')
+				.populate('employees')
+				.populate('orders')
+				.populate({
+					path: 'orders',
+					populate: {
+						path: 'business',
+					},
+				})
+				.populate({
+					path: 'orders',
+					populate: {
+						path: 'user',
+					},
+				})
+				.populate({
+					path: 'orders',
+					populate: {
+						path: 'products',
+						populate: {
+							path: 'product',
+						},
+					},
+				})
+			} else {
+				return Business.findByIdAndUpdate(
+					businessID,
+					{ $push: { highlightedProducts: productID } },
+					{ new: true }
+				).populate('products')
+				.populate('employees')
+				.populate('orders')
+				.populate({
+					path: 'orders',
+					populate: {
+						path: 'business',
+					},
+				})
+				.populate({
+					path: 'orders',
+					populate: {
+						path: 'user',
+					},
+				})
+				.populate({
+					path: 'orders',
+					populate: {
+						path: 'products',
+						populate: {
+							path: 'product',
+						},
+					},
+				})
+			}
+		})
+		.then((businessUpdated) => {
+			res.status(200).json(businessUpdated)
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
+
 module.exports = router;
