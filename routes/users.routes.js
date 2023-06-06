@@ -575,7 +575,7 @@ router.put('/mode/:userID', (req, res, next) => {
 	const userID = req.params.userID;
 	const mode = req.body;
 
-	User.findByIdAndUpdate(userID, { mode: mode.mode })
+	User.findByIdAndUpdate(userID, { isDark: mode.mode })
 		.then((user) => {
 			res.status(200).json(user);
 		})
@@ -590,7 +590,7 @@ router.get('/mode/:userID', (req, res, next) => {
 
 	User.findById(userID)
 		.then((user) => {
-			const mode = user.mode;
+			const mode = user.isDark;
 			res.status(200).json({ mode });
 		})
 		.catch((err) => {
