@@ -43,7 +43,8 @@ const userSchema = new Schema(
 				},
 				quantity: Number,
 			},
-		]
+		],
+		isDark:Boolean
 	},
 	{
 		versionKey: false,

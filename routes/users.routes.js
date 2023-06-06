@@ -571,4 +571,32 @@ router.post('/test/:userID', (req, res, next) => {
 	});
 });
 
+router.put('/mode/:userID', (req, res, next) => {
+	const userID = req.params.userID;
+	const mode = req.body;
+
+	User.findByIdAndUpdate(userID, { mode: mode.mode })
+		.then((user) => {
+			res.status(200).json(user);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
+
+router.get('/mode/:userID', (req, res, next) => {
+	const userID = req.params.userID;
+
+	User.findById(userID)
+		.then((user) => {
+			const mode = user.mode;
+			res.status(200).json({ mode });
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
+
 module.exports = router;
