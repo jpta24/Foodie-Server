@@ -11,28 +11,45 @@ const userSchema = new Schema(
 		phone: Number || String,
 		rol: {
 			type: String,
-			enum: ['developer', 'adminPending','admin', 'employee', 'employeePending', 'user'],
+			enum: [
+				'developer',
+				'adminPending',
+				'admin',
+				'employee',
+				'employeePending',
+				'user',
+			],
 		},
-		business:{
-		type: Schema.Types.ObjectId,
-		ref: 'Business',
+		business: {
+			type: Schema.Types.ObjectId,
+			ref: 'Business',
 		},
+		visitedBusiness:[
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Business',
+				default: [],
+			},
+		],
 		savedBusiness: [
 			{
 				type: Schema.Types.ObjectId,
 				ref: 'Business',
+				default: [],
 			},
 		],
 		savedProducts: [
 			{
 				type: Schema.Types.ObjectId,
 				ref: 'Product',
+				default: [],
 			},
 		],
 		orders: [
 			{
 				type: Schema.Types.ObjectId,
 				ref: 'Order',
+				default: [],
 			},
 		],
 		cart: [
@@ -40,11 +57,12 @@ const userSchema = new Schema(
 				product: {
 					type: Schema.Types.ObjectId,
 					ref: 'Product',
+					default: [],
 				},
 				quantity: Number,
 			},
 		],
-		isDark:Boolean
+		isDark: Boolean,
 	},
 	{
 		versionKey: false,

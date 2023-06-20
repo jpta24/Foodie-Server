@@ -42,7 +42,7 @@ router.get('/:userID', (req, res, next) => {
 				name,
 				phone,
 				rol,
-				business,
+				business,visitedBusiness,
 				savedBusiness,
 				savedProducts,
 				orders,
@@ -56,7 +56,7 @@ router.get('/:userID', (req, res, next) => {
 				name,
 				phone,
 				rol,
-				business,
+				business,visitedBusiness,
 				savedBusiness,
 				savedProducts,
 				orders,
@@ -408,13 +408,13 @@ router.put('/order/:userID', (req, res, next) => {
 	});
 });
 
-router.put('/business/:userID', (req, res, next) => {
+router.put('/visitedBusiness/:userID', (req, res, next) => {
 	const userID = req.params.userID;
 	const newBuz = req.body;
 	User.findByIdAndUpdate(userID, {
-		$addToSet: { savedBusiness: { $each: newBuz } },
+		$addToSet: { visitedBusiness: { $each: newBuz } },
 	})
-		.populate('savedBusiness')
+		.populate('visitedBusiness')
 		.populate('business')
 		.then((foundUser) => {
 			const {
@@ -425,6 +425,7 @@ router.put('/business/:userID', (req, res, next) => {
 				phone,
 				rol,
 				business,
+				visitedBusiness,
 				savedBusiness,
 				savedProducts,
 				orders,
@@ -439,6 +440,7 @@ router.put('/business/:userID', (req, res, next) => {
 				phone,
 				rol,
 				business,
+				visitedBusiness,
 				savedBusiness,
 				savedProducts,
 				orders,
@@ -561,15 +563,38 @@ router.put('/savedProduct/:userID', (req, res, next) => {
 		});
 });
 
-router.post('/test/:userID', (req, res, next) => {
+router.put('/savedBusiness/:userID', (req, res, next) => {
 	const userID = req.params.userID;
+	const { businessID } = req.body;
 
-	User.findById(userID).then((resp) => {
-		res
-			.status(200)
-			.json(resp.savedBusiness.includes('633fe7aca2b8a625c4c53207'));
-	});
+	User.findById(userID)
+		.then((userFound) => {
+			if (userFound.savedBusiness?.includes(businessID)) {
+				return User.findByIdAndUpdate(
+					userID,
+					{ $pull: { savedBusiness: businessID } },
+					{ new: true }
+				)
+			} else {
+				return User.findByIdAndUpdate(
+					userID,
+					{ $push: { savedBusiness: businessID } },
+					{ new: true }
+				)
+			}
+		})
+		.then((userUpdated) => {
+			const savedBusiness = userUpdated.savedBusiness;
+			const savedProducts = userUpdated.savedProducts;
+			res.status(200).json({ savedBusiness, savedProducts })
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
 });
+
+
 
 router.put('/mode/:userID', (req, res, next) => {
 	const userID = req.params.userID;
@@ -597,6 +622,16 @@ router.get('/mode/:userID', (req, res, next) => {
 			console.log(err);
 			res.status(500).json({ message: 'Sorry internal error occurred' });
 		});
+});
+
+router.post('/test/:userID', (req, res, next) => {
+	const userID = req.params.userID;
+
+	User.findById(userID).then((resp) => {
+		res
+			.status(200)
+			.json(resp.savedBusiness.includes('633fe7aca2b8a625c4c53207'));
+	});
 });
 
 module.exports = router;
