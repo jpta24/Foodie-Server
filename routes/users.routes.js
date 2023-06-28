@@ -42,7 +42,8 @@ router.get('/:userID', (req, res, next) => {
 				name,
 				phone,
 				rol,
-				business,visitedBusiness,
+				business,
+				visitedBusiness,
 				savedBusiness,
 				savedProducts,
 				orders,
@@ -56,7 +57,8 @@ router.get('/:userID', (req, res, next) => {
 				name,
 				phone,
 				rol,
-				business,visitedBusiness,
+				business,
+				visitedBusiness,
 				savedBusiness,
 				savedProducts,
 				orders,
@@ -111,6 +113,7 @@ router.put('/addCart/:userID', (req, res, next) => {
 	const userID = req.params.userID;
 
 	const { cart } = req.body;
+	console.log(cart)
 	User.findByIdAndUpdate(userID, { $push: { cart: cart } }, { new: true })
 		.then((user) => {
 			res.status(200).json(user);
@@ -127,7 +130,7 @@ router.put('/addQtyCart/:userID', (req, res, next) => {
 	const { cart } = req.body;
 	User.findByIdAndUpdate(
 		userID,
-		{ $inc: { 'cart.$[elem].quantity': 1 } },
+		{ $inc: { 'cart.$[elem].quantity': cart.quantity } },
 		{ arrayFilters: [{ 'elem.product': cart.product }], new: true }
 	)
 		.then((user) => {
@@ -145,7 +148,7 @@ router.put('/removeQtyCart/:userID', (req, res, next) => {
 	const { cart } = req.body;
 	User.findByIdAndUpdate(
 		userID,
-		{ $inc: { 'cart.$[elem].quantity': -1 } },
+		{ $inc: { 'cart.$[elem].quantity': -cart.quantity } },
 		{ arrayFilters: [{ 'elem.product': cart.product }], new: true }
 	)
 		.then((user) => {
@@ -542,20 +545,20 @@ router.put('/savedProduct/:userID', (req, res, next) => {
 					userID,
 					{ $pull: { savedProducts: productID } },
 					{ new: true }
-				)
+				);
 			} else {
 				return User.findByIdAndUpdate(
 					userID,
 					{ $push: { savedProducts: productID } },
 					{ new: true }
-				)
+				);
 			}
 		})
 		.then((userUpdated) => {
 			const savedBusiness = userUpdated.savedBusiness;
 			const savedProducts = userUpdated.savedProducts;
-            console.log(userUpdated.savedProducts);
-			res.status(200).json({ savedBusiness, savedProducts })
+			console.log(userUpdated.savedProducts);
+			res.status(200).json({ savedBusiness, savedProducts });
 		})
 		.catch((err) => {
 			console.log(err);
@@ -574,27 +577,25 @@ router.put('/savedBusiness/:userID', (req, res, next) => {
 					userID,
 					{ $pull: { savedBusiness: businessID } },
 					{ new: true }
-				)
+				);
 			} else {
 				return User.findByIdAndUpdate(
 					userID,
 					{ $push: { savedBusiness: businessID } },
 					{ new: true }
-				)
+				);
 			}
 		})
 		.then((userUpdated) => {
 			const savedBusiness = userUpdated.savedBusiness;
 			const savedProducts = userUpdated.savedProducts;
-			res.status(200).json({ savedBusiness, savedProducts })
+			res.status(200).json({ savedBusiness, savedProducts });
 		})
 		.catch((err) => {
 			console.log(err);
 			res.status(500).json({ message: 'Sorry internal error occurred' });
 		});
 });
-
-
 
 router.put('/mode/:userID', (req, res, next) => {
 	const userID = req.params.userID;

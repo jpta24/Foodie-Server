@@ -57,7 +57,6 @@ const userSchema = new Schema(
 				product: {
 					type: Schema.Types.ObjectId,
 					ref: 'Product',
-					default: [],
 				},
 				quantity: Number,
 			},
