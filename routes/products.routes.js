@@ -129,7 +129,7 @@ router.get('/:productID', (req, res, next) => {
 		});
 });
 
-router.delete('/delete/:productID', isAuthenticateds, async (req, res, next) => {
+router.delete('/delete/:productID', isAuthenticated, async (req, res, next) => {
 	try {
 		const { productID } = req.params;
 		// Elimina el producto de la base de datos
