@@ -34,7 +34,7 @@ const business = require('./routes/business.routes.js');
 app.use('/business', business);
 
 const products = require('./routes/products.routes.js');
-app.use('/products',isAuthenticated, products);
+app.use('/products', products);
 
 const orders = require('./routes/orders.routes.js');
 app.use('/orders',isAuthenticated, orders);

@@ -4,7 +4,9 @@ const cloudinary = require('cloudinary').v2;
 const Business = require('../models/Bussiness.model');
 const Product = require('../models/Product.model');
 
-router.post('/', (req, res, next) => {
+const { isAuthenticated } = require('../middleware/jwt.middleware');
+
+router.post('/', isAuthenticated, (req, res, next) => {
 	const {
 		name,
 		mainImg,
@@ -53,7 +55,7 @@ router.post('/', (req, res, next) => {
 		});
 });
 
-router.put('/status/:productID', (req, res, next) => {
+router.put('/status/:productID', isAuthenticated, (req, res, next) => {
 	const productID = req.params.productID;
 
 	const { status } = req.body;
@@ -67,7 +69,7 @@ router.put('/status/:productID', (req, res, next) => {
 		});
 });
 
-router.put('/edit/:productID', (req, res, next) => {
+router.put('/edit/:productID', isAuthenticated, (req, res, next) => {
 	const productID = req.params.productID;
 
 	const {
@@ -108,6 +110,12 @@ router.get('/:productID', (req, res, next) => {
 
 	Product.findById(productID)
 		.populate('business')
+		.populate({
+			path: 'business',
+			populate: {
+				path: 'products'
+			},
+		})
 		.then((product) => {
 			if (product) {
 				res.status(200).json({ product });
@@ -121,7 +129,7 @@ router.get('/:productID', (req, res, next) => {
 		});
 });
 
-router.delete('/delete/:productID', async (req, res, next) => {
+router.delete('/delete/:productID', isAuthenticateds, async (req, res, next) => {
 	try {
 		const { productID } = req.params;
 		// Elimina el producto de la base de datos
