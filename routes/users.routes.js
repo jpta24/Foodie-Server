@@ -164,7 +164,7 @@ router.put('/removeCart/:userID', (req, res, next) => {
 	const userID = req.params.userID;
 
 	const { product } = req.body;
-	User.findByIdAndUpdate(userID, { $pull: { cart: { _id: product } } })
+	User.findByIdAndUpdate(userID, { $pull: { cart: { product: product } } })
 		.then((user) => {
 			res.status(200).json(user);
 		})
