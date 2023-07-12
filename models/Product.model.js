@@ -9,6 +9,7 @@ const productSchema = new Schema(
         otherImg:[String],
         description:String,
         type:String,
+		weight:Number,
         timesSaved:Number,
         timesOrdered:Number,
         business:{

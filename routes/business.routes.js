@@ -7,6 +7,7 @@ const User = require('../models/User.model');
 const { isAuthenticated } = require('../middleware/jwt.middleware');
 
 router.post('/', isAuthenticated, (req, res, next) => {
+	console.log('here')
 	const {
 		name,
 		logoUrl,
@@ -14,6 +15,7 @@ router.post('/', isAuthenticated, (req, res, next) => {
 		format,
 		type,
 		categories,
+		description,
 		bgUrl,
 		pdfMenu,
 		employees,
@@ -22,6 +24,22 @@ router.post('/', isAuthenticated, (req, res, next) => {
 		payment,
 		membership: preMembership,
 	} = req.body;
+	console.log({
+		name,
+		logoUrl,
+		address,
+		format,
+		type,
+		categories,
+		description,
+		bgUrl,
+		pdfMenu,
+		employees,
+		owner,
+		currency,
+		payment,
+		preMembership,
+	})
 
 	if (
 		format.delivery === false &&
@@ -61,10 +79,11 @@ router.post('/', isAuthenticated, (req, res, next) => {
 		return;
 	}
 	const membership = {
-		plan: preMembership,
+		plan: preMembership.plan,
 		usedTrial: preMembership === 'trial' ? true : false,
 		updated: new Date(),
 	};
+	console.log({membership});
 
 	Business.findOne({ name })
 		.then((foundBusiness) => {
@@ -79,6 +98,7 @@ router.post('/', isAuthenticated, (req, res, next) => {
 				address,
 				format,
 				type,
+				description,
 				categories,
 				bgUrl,
 				pdfMenu,
@@ -218,6 +238,7 @@ router.put('/edit/:businessNameEncoded', (req, res, next) => {
 		logoUrl,
 		address,
 		type,
+		description,
 		categories,
 		bgUrl,
 		pdfMenu,
@@ -235,6 +256,7 @@ router.put('/edit/:businessNameEncoded', (req, res, next) => {
 			logoUrl,
 			address,
 			type,
+			description,
 			categories,
 			bgUrl,
 			pdfMenu,

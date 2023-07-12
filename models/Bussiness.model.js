@@ -45,6 +45,7 @@ const businessSchema = new Schema(
 			packed: Boolean,
 			frozen: Boolean,
 		},
+		description:String,
 		logoUrl: String,
 		bgUrl: String,
 		owner: {
