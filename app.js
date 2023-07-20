@@ -28,7 +28,7 @@ const auth = require('./routes/auth.routes.js');
 app.use('/auth', auth);
 
 const users = require('./routes/users.routes.js');
-app.use('/users', users);
+app.use('/users',isAuthenticated, users);
 
 const business = require('./routes/business.routes.js');
 app.use('/business', business);

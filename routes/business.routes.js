@@ -230,7 +230,7 @@ router.get('/:businessNameEncoded', (req, res, next) => {
 		});
 });
 
-router.put('/edit/:businessNameEncoded', (req, res, next) => {
+router.put('/edit/:businessNameEncoded', isAuthenticated, (req, res, next) => {
 	const buzName = req.params.businessNameEncoded.split('-').join(' ');
 
 	const {
@@ -277,7 +277,7 @@ router.put('/edit/:businessNameEncoded', (req, res, next) => {
 		});
 });
 
-router.delete('/delete/:businessID', (req, res) => {
+router.delete('/delete/:businessID',  isAuthenticated, (req, res) => {
 	const { businessID } = req.params;
 
 	Business.findByIdAndRemove(businessID)
@@ -307,7 +307,7 @@ router.get('/membership/:businessNameEncoded', (req, res, next) => {
 		});
 });
 
-router.put('/membership/:businessNameEncoded', (req, res, next) => {
+router.put('/membership/:businessNameEncoded',  isAuthenticated, (req, res, next) => {
 	const buzName = req.params.businessNameEncoded.split('-').join(' ');
 
 	const { selectedPlan, usedTrial } = req.body;
@@ -330,7 +330,7 @@ router.put('/membership/:businessNameEncoded', (req, res, next) => {
 		});
 });
 
-router.put('/highlightedProducts/:businessID', (req, res, next) => {
+router.put('/highlightedProducts/:businessID',  isAuthenticated,(req, res, next) => {
 	const businessID = req.params.businessID;
 	const { productID } = req.body;
 
@@ -427,6 +427,44 @@ router.put('/highlightedProducts/:businessID', (req, res, next) => {
 		})
 		.then((businessUpdated) => {
 			res.status(200).json(businessUpdated)
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
+
+router.put('/reorder/:businessID', (req, res, next) => {
+	const businessID = req.params.businessID;
+	const {field,array} = req.body;
+
+	Business.findByIdAndUpdate(businessID, { [field]: array.map(elem=>elem._id) },{new:true})
+		.populate('products')
+		.populate('employees')
+		.populate('orders')
+		.populate({
+			path: 'orders',
+			populate: {
+				path: 'business',
+			},
+		})
+		.populate({
+			path: 'orders',
+			populate: {
+				path: 'user',
+			},
+		})
+		.populate({
+			path: 'orders',
+			populate: {
+				path: 'products',
+				populate: {
+					path: 'product',
+				},
+			},
+		})
+		.then((business) => {
+			res.status(200).json(business);
 		})
 		.catch((err) => {
 			console.log(err);

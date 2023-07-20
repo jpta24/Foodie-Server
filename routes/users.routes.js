@@ -625,6 +625,20 @@ router.get('/mode/:userID', (req, res, next) => {
 		});
 });
 
+router.put('/reorder/:userID', (req, res, next) => {
+	const userID = req.params.userID;
+	const {field,array} = req.body;
+
+	User.findByIdAndUpdate(userID, { [field]: array.map(elem=>elem._id) },{new:true})
+		.then((user) => {
+			res.status(200).json(user);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
+
 router.post('/test/:userID', (req, res, next) => {
 	const userID = req.params.userID;
 
