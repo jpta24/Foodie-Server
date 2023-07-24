@@ -437,8 +437,11 @@ router.put('/highlightedProducts/:businessID',  isAuthenticated,(req, res, next)
 router.put('/reorder/:businessID', (req, res, next) => {
 	const businessID = req.params.businessID;
 	const {field,array} = req.body;
+	const newArray = array[0]._id  ?  array.map(elem=>elem._id) : array
+	// console.log(newArray)
+	// return newArray
 
-	Business.findByIdAndUpdate(businessID, { [field]: array.map(elem=>elem._id) },{new:true})
+	Business.findByIdAndUpdate(businessID, { [field]: newArray },{new:true})
 		.populate('products')
 		.populate('employees')
 		.populate('orders')
