@@ -7,39 +7,27 @@ const User = require('../models/User.model');
 const { isAuthenticated } = require('../middleware/jwt.middleware');
 
 router.post('/', isAuthenticated, (req, res, next) => {
-	console.log('here')
-	const {
-		name,
-		logoUrl,
-		address,
-		format,
-		type,
-		categories,
-		description,
-		bgUrl,
-		pdfMenu,
-		employees,
-		owner,
-		currency,
-		payment,
-		membership: preMembership,
-	} = req.body;
-	console.log({
-		name,
-		logoUrl,
-		address,
-		format,
-		type,
-		categories,
-		description,
-		bgUrl,
-		pdfMenu,
-		employees,
-		owner,
-		currency,
-		payment,
-		preMembership,
-	})
+	const { buz } = req.body;
+	
+	const {name,address,categories,type,format,owner,currency,membership: preMembership} = buz;
+
+	// console.log({
+	// 	name,
+	// 	logoUrl,
+	// 	address,
+	// 	ssmm,
+	// 	format,
+	// 	type,
+	// 	categories,
+	// 	description,
+	// 	bgUrl,
+	// 	pdfMenu,
+	// 	employees,
+	// 	owner,
+	// 	currency,
+	// 	payment,
+	// 	preMembership,
+	// });
 
 	if (
 		format.delivery === false &&
@@ -83,8 +71,8 @@ router.post('/', isAuthenticated, (req, res, next) => {
 		usedTrial: preMembership === 'trial' ? true : false,
 		updated: new Date(),
 	};
-	console.log({membership});
-
+	// console.log({ membership });
+	const newBuz = {name,address,categories,type,format,owner,currency,membership};
 	Business.findOne({ name })
 		.then((foundBusiness) => {
 			if (foundBusiness) {
@@ -92,22 +80,7 @@ router.post('/', isAuthenticated, (req, res, next) => {
 				return;
 			}
 
-			return Business.create({
-				name,
-				logoUrl,
-				address,
-				format,
-				type,
-				description,
-				categories,
-				bgUrl,
-				pdfMenu,
-				employees,
-				owner,
-				currency,
-				payment,
-				membership,
-			});
+			return Business.create(newBuz);
 		})
 		.then((business) => {
 			User.findByIdAndUpdate(
@@ -181,11 +154,9 @@ router.post('/', isAuthenticated, (req, res, next) => {
 		})
 		.catch((err) => {
 			console.log(err);
-			res
-				.status(500)
-				.json({
-					message: 'Could not create the Business, check data and try again',
-				});
+			res.status(500).json({
+				message: 'Could not create the Business, check data and try again',
+			});
 		});
 });
 
@@ -232,44 +203,23 @@ router.get('/:businessNameEncoded', (req, res, next) => {
 
 router.put('/edit/:businessNameEncoded', isAuthenticated, (req, res, next) => {
 	const buzName = req.params.businessNameEncoded.split('-').join(' ');
-
-	const {
-		name,
-		logoUrl,
-		address,
-		type,
-		description,
-		categories,
-		bgUrl,
-		pdfMenu,
-		employees,
-		owner,
-		currency,
-		payment,
-		format,
-	} = req.body;
+	const { part, buz } = req.body;
+	let editBuz
+	if (part === 1) {
+		const { name,address,categories,type,format,owner,currency } = buz;
+		editBuz = {name,address,categories,type,format,owner,currency};
+	} else if (part === 2) {
+		const { logoUrl,ssmm,description,bgUrl,pdfMenu,payment } = buz;
+		editBuz = {logoUrl,ssmm,description,bgUrl,pdfMenu,payment};
+	}
 
 	Business.findOneAndUpdate(
 		{ name: buzName },
-		{
-			name,
-			logoUrl,
-			address,
-			type,
-			description,
-			categories,
-			bgUrl,
-			pdfMenu,
-			employees,
-			owner,
-			currency,
-			payment,
-			format,
-		},
+		editBuz,
 		{ new: true }
 	)
 		.then((business) => {
-			res.status(200).json(business);
+			res.status(200).json({business});
 		})
 		.catch((err) => {
 			console.log(err);
@@ -277,7 +227,7 @@ router.put('/edit/:businessNameEncoded', isAuthenticated, (req, res, next) => {
 		});
 });
 
-router.delete('/delete/:businessID',  isAuthenticated, (req, res) => {
+router.delete('/delete/:businessID', isAuthenticated, (req, res) => {
 	const { businessID } = req.params;
 
 	Business.findByIdAndRemove(businessID)
@@ -307,141 +257,152 @@ router.get('/membership/:businessNameEncoded', (req, res, next) => {
 		});
 });
 
-router.put('/membership/:businessNameEncoded',  isAuthenticated, (req, res, next) => {
-	const buzName = req.params.businessNameEncoded.split('-').join(' ');
+router.put(
+	'/membership/:businessNameEncoded',
+	isAuthenticated,
+	(req, res, next) => {
+		const buzName = req.params.businessNameEncoded.split('-').join(' ');
 
-	const { selectedPlan, usedTrial } = req.body;
+		const { selectedPlan, usedTrial } = req.body;
 
-	const newTrialStatus = usedTrial || selectedPlan === 'trial' ? true : false;
+		const newTrialStatus = usedTrial || selectedPlan === 'trial' ? true : false;
 
-	const membership = {
-		plan: selectedPlan,
-		updated: new Date(),
-		usedTrial: newTrialStatus,
-	};
+		const membership = {
+			plan: selectedPlan,
+			updated: new Date(),
+			usedTrial: newTrialStatus,
+		};
 
-	Business.findOneAndUpdate({ name: buzName }, { membership }, { new: true })
-		.then((business) => {
-			res.status(200).json(business);
-		})
-		.catch((err) => {
-			console.log(err);
-			res.status(500).json({ message: 'Sorry internal error occurred' });
-		});
-});
+		Business.findOneAndUpdate({ name: buzName }, { membership }, { new: true })
+			.then((business) => {
+				res.status(200).json(business);
+			})
+			.catch((err) => {
+				console.log(err);
+				res.status(500).json({ message: 'Sorry internal error occurred' });
+			});
+	}
+);
 
-router.put('/highlightedProducts/:businessID',  isAuthenticated,(req, res, next) => {
-	const businessID = req.params.businessID;
-	const { productID } = req.body;
+router.put(
+	'/highlightedProducts/:businessID',
+	isAuthenticated,
+	(req, res, next) => {
+		const businessID = req.params.businessID;
+		const { productID } = req.body;
 
-	Business.findById(businessID)
-		.then((businessFound) => {
-			if (businessFound.highlightedProducts === undefined){
-				return Business.findByIdAndUpdate(
-					businessID,
-					{ $push: { highlightedProducts: productID } },
-					{ new: true }
-				).populate('products')
-				.populate('employees')
-				.populate('orders')
-				.populate({
-					path: 'orders',
-					populate: {
-						path: 'business',
-					},
-				})
-				.populate({
-					path: 'orders',
-					populate: {
-						path: 'user',
-					},
-				})
-				.populate({
-					path: 'orders',
-					populate: {
-						path: 'products',
-						populate: {
-							path: 'product',
-						},
-					},
-				})
-			} else if (businessFound.highlightedProducts.includes(productID)) {
-				return Business.findByIdAndUpdate(
-					businessID,
-					{ $pull: { highlightedProducts: productID } },
-					{ new: true }
-				).populate('products')
-				.populate('employees')
-				.populate('orders')
-				.populate({
-					path: 'orders',
-					populate: {
-						path: 'business',
-					},
-				})
-				.populate({
-					path: 'orders',
-					populate: {
-						path: 'user',
-					},
-				})
-				.populate({
-					path: 'orders',
-					populate: {
-						path: 'products',
-						populate: {
-							path: 'product',
-						},
-					},
-				})
-			} else {
-				return Business.findByIdAndUpdate(
-					businessID,
-					{ $push: { highlightedProducts: productID } },
-					{ new: true }
-				).populate('products')
-				.populate('employees')
-				.populate('orders')
-				.populate({
-					path: 'orders',
-					populate: {
-						path: 'business',
-					},
-				})
-				.populate({
-					path: 'orders',
-					populate: {
-						path: 'user',
-					},
-				})
-				.populate({
-					path: 'orders',
-					populate: {
-						path: 'products',
-						populate: {
-							path: 'product',
-						},
-					},
-				})
-			}
-		})
-		.then((businessUpdated) => {
-			res.status(200).json(businessUpdated)
-		})
-		.catch((err) => {
-			console.log(err);
-			res.status(500).json({ message: 'Sorry internal error occurred' });
-		});
-});
+		Business.findById(businessID)
+			.then((businessFound) => {
+				if (businessFound.highlightedProducts === undefined) {
+					return Business.findByIdAndUpdate(
+						businessID,
+						{ $push: { highlightedProducts: productID } },
+						{ new: true }
+					)
+						.populate('products')
+						.populate('employees')
+						.populate('orders')
+						.populate({
+							path: 'orders',
+							populate: {
+								path: 'business',
+							},
+						})
+						.populate({
+							path: 'orders',
+							populate: {
+								path: 'user',
+							},
+						})
+						.populate({
+							path: 'orders',
+							populate: {
+								path: 'products',
+								populate: {
+									path: 'product',
+								},
+							},
+						});
+				} else if (businessFound.highlightedProducts.includes(productID)) {
+					return Business.findByIdAndUpdate(
+						businessID,
+						{ $pull: { highlightedProducts: productID } },
+						{ new: true }
+					)
+						.populate('products')
+						.populate('employees')
+						.populate('orders')
+						.populate({
+							path: 'orders',
+							populate: {
+								path: 'business',
+							},
+						})
+						.populate({
+							path: 'orders',
+							populate: {
+								path: 'user',
+							},
+						})
+						.populate({
+							path: 'orders',
+							populate: {
+								path: 'products',
+								populate: {
+									path: 'product',
+								},
+							},
+						});
+				} else {
+					return Business.findByIdAndUpdate(
+						businessID,
+						{ $push: { highlightedProducts: productID } },
+						{ new: true }
+					)
+						.populate('products')
+						.populate('employees')
+						.populate('orders')
+						.populate({
+							path: 'orders',
+							populate: {
+								path: 'business',
+							},
+						})
+						.populate({
+							path: 'orders',
+							populate: {
+								path: 'user',
+							},
+						})
+						.populate({
+							path: 'orders',
+							populate: {
+								path: 'products',
+								populate: {
+									path: 'product',
+								},
+							},
+						});
+				}
+			})
+			.then((businessUpdated) => {
+				res.status(200).json(businessUpdated);
+			})
+			.catch((err) => {
+				console.log(err);
+				res.status(500).json({ message: 'Sorry internal error occurred' });
+			});
+	}
+);
 
 router.put('/reorder/:businessID', (req, res, next) => {
 	const businessID = req.params.businessID;
-	const {field,array} = req.body;
-	const newArray = array[0]._id  ?  array.map(elem=>elem._id) : array
+	const { field, array } = req.body;
+	const newArray = array[0]._id ? array.map((elem) => elem._id) : array;
 	// console.log(newArray)
 	// return newArray
 
-	Business.findByIdAndUpdate(businessID, { [field]: newArray },{new:true})
+	Business.findByIdAndUpdate(businessID, { [field]: newArray }, { new: true })
 		.populate('products')
 		.populate('employees')
 		.populate('orders')

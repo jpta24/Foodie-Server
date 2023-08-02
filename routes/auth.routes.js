@@ -11,7 +11,8 @@ router.post('/signup', (req, res, next) => {
 	const saltRounds = 10;
 	let rol = 'user';
 
-	const { username, password, email, lang } = req.body;
+	const { username, password, email, lang, terms } = req.body;
+
 
 	if (username === '' || password === '' || email === '') {
 		res.status(400).json({ message: 'Please provide all fields' });
@@ -19,6 +20,11 @@ router.post('/signup', (req, res, next) => {
 	}
 	if (password.length < 4) {
 		res.status(400).json({ message: 'Password has to be 4  chars min' });
+		return;
+	}
+	
+	if(terms === ''){
+		res.status(400).json({ message: 'Please Accept the Terms and Conditions' });
 		return;
 	}
 
@@ -37,9 +43,9 @@ router.post('/signup', (req, res, next) => {
 
 			// Create the new user in the database
 			// We return a pending promise, which allows us to chain another `then`
-			return User.create({ username, password: hashedPassword, email, rol, lang });
+			return User.create({ username, password: hashedPassword, email, rol, lang, terms });
 		})
-		.then((createdUser) => {
+		.then((createdUser) => { 
 			// Deconstruct the newly created user object to omit the password
 			// We should never expose passwords publicly
 			const { username, email, rol, _id } = createdUser;

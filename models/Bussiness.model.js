@@ -11,6 +11,11 @@ const businessSchema = new Schema(
 			telephone: String,
 			email: String,
 		},
+		ssmm:{
+			fb:String,
+			ig:String,
+			wa:String
+		},
 		format: {
 			delivery: {
 				delivery: Boolean,
