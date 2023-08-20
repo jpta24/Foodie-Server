@@ -639,6 +639,38 @@ router.put('/reorder/:userID', (req, res, next) => {
 		});
 });
 
+router.get('/sidebar/:userID', (req, res, next) => {
+	const userID = req.params.userID;
+
+	User.findById(userID).populate({
+		path: 'business',
+		select: 'name logoUrl'
+	  }).select('business name avatarUrl')
+		.then((user) => {
+			res.status(200).json(user);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
+
+router.get('/navbar/:userID', (req, res, next) => {
+	const userID = req.params.userID;
+
+	User.findById(userID).populate({
+		path: 'business',
+		select: 'name'
+	  }).select('business')
+		.then((user) => {
+			res.status(200).json(user);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
+
 router.post('/test/:userID', (req, res, next) => {
 	const userID = req.params.userID;
 
