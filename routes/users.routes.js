@@ -113,7 +113,7 @@ router.put('/addCart/:userID', (req, res, next) => {
 	const userID = req.params.userID;
 
 	const { cart } = req.body;
-	console.log(cart)
+	console.log(cart);
 	User.findByIdAndUpdate(userID, { $push: { cart: cart } }, { new: true })
 		.then((user) => {
 			res.status(200).json(user);
@@ -627,9 +627,13 @@ router.get('/mode/:userID', (req, res, next) => {
 
 router.put('/reorder/:userID', (req, res, next) => {
 	const userID = req.params.userID;
-	const {field,array} = req.body;
+	const { field, array } = req.body;
 
-	User.findByIdAndUpdate(userID, { [field]: array.map(elem=>elem._id) },{new:true})
+	User.findByIdAndUpdate(
+		userID,
+		{ [field]: array.map((elem) => elem._id) },
+		{ new: true }
+	)
 		.then((user) => {
 			res.status(200).json(user);
 		})
@@ -642,10 +646,12 @@ router.put('/reorder/:userID', (req, res, next) => {
 router.get('/sidebar/:userID', (req, res, next) => {
 	const userID = req.params.userID;
 
-	User.findById(userID).populate({
-		path: 'business',
-		select: 'name logoUrl'
-	  }).select('business name avatarUrl')
+	User.findById(userID)
+		.populate({
+			path: 'business',
+			select: 'name logoUrl',
+		})
+		.select('business name avatarUrl')
 		.then((user) => {
 			res.status(200).json(user);
 		})
@@ -658,10 +664,56 @@ router.get('/sidebar/:userID', (req, res, next) => {
 router.get('/navbar/:userID', (req, res, next) => {
 	const userID = req.params.userID;
 
-	User.findById(userID).populate({
-		path: 'business',
-		select: 'name'
-	  }).select('business')
+	User.findById(userID)
+		.populate({
+			path: 'business',
+			select: 'name',
+		})
+		.select('business')
+		.then((user) => {
+			res.status(200).json(user);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
+
+router.get('/dashboard/:userID', (req, res, next) => {
+	const userID = req.params.userID;
+
+	User.findById(userID)
+		.populate({
+			path: 'cart',
+			populate: {
+				path: 'product',
+				select: 'status mainImg name price',
+				populate: {
+					path: 'business',
+					select: 'currency',
+				},
+			},
+		})
+		.populate({
+			path: 'orders',
+			select: 'products business status summary paymentMethod format',
+			populate: [
+				{
+					path: 'products',
+					populate: {
+						path: 'product',
+						select: 'status name price',
+					},
+				},
+				{
+					path: 'business',
+					select: 'currency logoUrl name',
+				},
+			],
+		})
+		.populate({ path: 'savedBusiness', select: 'name bgUrl logoUrl' })
+		.populate({ path: 'visitedBusiness', select: 'name bgUrl logoUrl' })
+		.select('cart orders savedBusiness visitedBusiness')
 		.then((user) => {
 			res.status(200).json(user);
 		})

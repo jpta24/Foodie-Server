@@ -436,4 +436,65 @@ router.put('/reorder/:businessID', (req, res, next) => {
 		});
 });
 
+router.get('/dashboard/:businessNameEncoded', (req, res, next) => {
+	const name = req.params.businessNameEncoded.split('-').join(' ');
+
+	Business.findOne({ name }).populate({
+		path: 'orders',
+		select: 'products business status summary paymentMethod format user note',
+		populate: [
+			{
+				path: 'products',
+				populate: {
+					path: 'product',
+					select: 'status name price',
+				},
+			},
+			{
+				path: 'business',
+				select: 'currency logoUrl name',
+			},
+			{
+				path: 'user',
+				select: 'name avatarUrl',
+			},
+		],
+	})
+		// .populate('products')
+		// .populate('employees')
+		// .populate('orders')
+		// .populate({
+		// 	path: 'orders',
+		// 	populate: {
+		// 		path: 'business',
+		// 	},
+		// })
+		// .populate({
+		// 	path: 'orders',
+		// 	populate: {
+		// 		path: 'user',
+		// 	},
+		// })
+		// .populate({
+		// 	path: 'orders',
+		// 	populate: {
+		// 		path: 'products',
+		// 		populate: {
+		// 			path: 'product',
+		// 		},
+		// 	},
+		// })
+		.then((business) => {
+			if (business) {
+				res.status(200).json({ business });
+			} else {
+				res.status(400).json({ message: 'Business does not exists.' });
+			}
+		})
+		.catch((err) => {
+			console.log(err);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		});
+});
+
 module.exports = router;

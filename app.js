@@ -39,6 +39,9 @@ app.use('/products', products);
 const orders = require('./routes/orders.routes.js');
 app.use('/orders',isAuthenticated, orders);
 
+const mails = require('./routes/mails.routes.js');
+app.use('/mails',mails);
+
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
