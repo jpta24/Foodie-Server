@@ -21,10 +21,17 @@ module.exports = (app) => {
   app.set("trust proxy", 1);
 
   // controls a very specific header to pass headers from the frontend
+  const allowedOrigins = [process.env.ORIGIN, process.env.ORIGIN2, "http://localhost:3000"];
   app.use(
     cors({
       credentials: true,
-      origin: process.env.ORIGIN || process.env.ORIGIN2 || "http://localhost:3000",
+      origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
     })
   );
 
