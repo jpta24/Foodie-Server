@@ -441,13 +441,13 @@ router.get('/dashboard/:businessNameEncoded', (req, res, next) => {
 
 	Business.findOne({ name }).populate({
 		path: 'orders',
-		select: 'products business status summary paymentMethod format user note',
+		select: 'products business status summary paymentMethod format user note createdAt',
 		populate: [
 			{
 				path: 'products',
 				populate: {
 					path: 'product',
-					select: 'status name price',
+					select: 'status name price mainImg',
 				},
 			},
 			{
