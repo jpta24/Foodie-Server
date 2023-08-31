@@ -7,13 +7,28 @@ const mongoose = require("mongoose");
 
 const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost/Foodie";
 
-mongoose
-  .connect(MONGO_URI)
-  .then((x) => {
+const connectDB = async ()=>{
+  try {
+    const conn = await mongoose.connect(MONGO_URI)
     console.log(
-      `Connected to Mongo! Database name: "${x.connections[0].name}"`
+      `Connected to Mongo! Database name: "${conn.connections[0].name}"`
     );
-  })
-  .catch((err) => {
-    console.error("Error connecting to mongo: ", err);
-  });
+  }catch (error) {
+    console.log("Error connecting to mongo: ", error);
+    process.exit(1);
+  }
+}
+
+// mongoose
+//   .connect(MONGO_URI)
+//   .then((x) => {
+//     console.log(
+//       `Connected to Mongo! Database name: "${x.connections[0].name}"`
+//     );
+//   })
+//   .catch((err) => {
+//     console.error("Error connecting to mongo: ", err);
+//   });
+
+module.exports = connectDB;
+
