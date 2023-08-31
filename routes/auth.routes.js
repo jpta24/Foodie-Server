@@ -121,7 +121,10 @@ router.post('/login', (req, res, next) => {
 	}
 
 	// Check the users collection if a user with the same username exists
-	User.findOne({ username })
+	User.findOne({ username }).populate({
+		path: 'business',
+		select: 'name',
+	},)
 		// .populate('business').populate('cart').populate('orders')
 		.then((foundUser) => {
 			if (!foundUser) {
@@ -142,7 +145,7 @@ router.post('/login', (req, res, next) => {
 					// email,
 					// avatarUrl,
 					// rol,
-					// business,
+					business,
 					// savedBusiness,
 					// savedProducts,
 					// orders,
@@ -156,7 +159,7 @@ router.post('/login', (req, res, next) => {
 					// email,
 					// avatarUrl,
 					// rol,
-					// business,
+					business,
 					// savedBusiness,
 					// savedProducts,
 					// orders,
