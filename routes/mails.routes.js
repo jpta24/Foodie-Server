@@ -12,7 +12,7 @@ router.post('/webmessage', (req, res, next) => {
 		},
 	});
 	let mailCreateAccount = {
-		from: process.env.MAIL,
+		from: process.env.EMAIL,
 		to: 'mmoncada@antaresintrade.com',
 		subject: 'Recibiste una Consulta en Antaresintrade.com',
 		html: `
@@ -34,6 +34,63 @@ router.post('/webmessage', (req, res, next) => {
                             <p>Correo: ${correo}</p>
                             <p>Mensaje:</p>
                             <p>${mensaje}</p>
+                        </div>
+                  </div>
+              </div>
+          </div>
+          `,
+	};
+
+	transporter.sendMail(mailCreateAccount, function (error, info) {
+		if (error) {
+			console.log(error);
+		} else {
+			console.log('Email Create Account sent: ' + info.response);
+		}
+	});
+
+	// Send a json response containing the user object
+	res.status(201).send({ message:'Mensaje Enviado' });
+});
+
+router.post('/webfoddys', (req, res, next) => {
+	const { nombre, correo } = req.body;
+	// Send email confirmation create an account
+	const transporter = nodemailer.createTransport({
+		// host: 'smtp.gmail.com',  // Servidor SMTP de Gmail
+		// port: 587,              // Puerto SMTP seguro de Gmail
+		// secure: false,          // Configurado en "false" porque no estás usando un puerto seguro directamente
+		// auth: {
+		// 	user: process.env.EMAILFOODYS,
+		// 	pass: process.env.PASSFODDYS2,
+		// },
+		service: 'gmail',
+		auth: {
+			user: process.env.EMAIL,
+			pass: process.env.PASSMAIL,
+		},
+		
+	});
+	let mailCreateAccount = {
+		from: 'info@foodys.app',
+		to: correo,
+		subject: 'New FOODYS User',
+		html: `
+          <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
+              <div>
+                  <div style='padding:10px'>
+                      <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
+                          <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
+                          <h3 style='margin-left:15px'>FOODYS</h3>
+                      </a>
+                  </div>
+                  <div style='padding:10px'>
+                      <h1 style='margin-top:3px'>Hola Jean,</h1>
+                      <p>Hay un nuevo usuario en la APP</p>
+                      <div>
+                            <hr/>
+                            <p>Nombre: ${nombre}
+                            <p>Correo: ${correo}</p>
                         </div>
                   </div>
               </div>
