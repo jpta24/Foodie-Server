@@ -12,7 +12,7 @@ router.post("/upload", fileUploader.single("imageUrl"), async (req, res, next) =
         currentImg.lastIndexOf("/") + 1,
         currentImg.lastIndexOf(".")
       );
-      const done = await cloudinary.uploader.destroy(publicId);
+      await cloudinary.uploader.destroy(publicId);
     }
 
     if (!req.file) {
