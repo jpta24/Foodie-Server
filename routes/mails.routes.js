@@ -64,7 +64,7 @@ router.post('/webfoddys', async (req, res, next) => {
 	const { nombre, correo } = req.body;
 
 	const mailOptions = {
-		from: 'info@foodys.app',
+		from: 'FOODYS APP <info@foodys.app>',
 		to: correo,
 		subject: 'New FOODYS User',
 		html: infoNewUser(nombre,correo)
