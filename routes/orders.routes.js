@@ -40,7 +40,7 @@ router.put('/status/:orderID', (req, res, next) => {
 			const mailOptionsStatusClient = {
 				from: 'info@foodys.app',
 				to: thisOrder.user.email,
-				subject: `You have ${thisOrder.status.toUpperCase()} your Foodie Order ${ordNum
+				subject: `You have ${thisOrder.status.toUpperCase()} your Foodys Order ${ordNum
 					.slice(10)
 					.toUpperCase()}`,
 				html: mailStatusClient(thisOrder, ordNum),
@@ -52,7 +52,7 @@ router.put('/status/:orderID', (req, res, next) => {
 			const mailOptionsStatusBusiness = {
 				from: 'info@foodys.app',
 				to: thisOrder.business.address.email,
-				subject: `Client has ${thisOrder.status.toUpperCase()} your Foodie Order ${ordNum
+				subject: `Client has ${thisOrder.status.toUpperCase()} your Foodys Order ${ordNum
 					.slice(10)
 					.toUpperCase()}`,
 				html: mailStatusBusiness(thisOrder, ordNum),
@@ -127,7 +127,7 @@ router.put('/statusBusiness/:orderID', (req, res, next) => {
 				to: thisOrder.user.email,
 				subject: `${
 					thisOrder.business.name
-				} has ${thisOrder.status.toUpperCase()} your Foodie Order ${ordNum
+				} has ${thisOrder.status.toUpperCase()} your Foodys Order ${ordNum
 					.slice(10)
 					.toUpperCase()}`,
 				html: mailStatusClientBusiness(thisOrder, ordNum),

@@ -113,7 +113,7 @@ router.post('/', isAuthenticated, (req, res, next) => {
 					const mailOptions = {
 						from: 'info@foodys.app',
 						to: address.email,
-						subject: 'You successfully created a Foodie Business account!',
+						subject: 'You successfully created a Foodys Business account!',
 						bcc: 'info@foodys.app',
 						html: newBusiness(userUpdated, name),
 					};

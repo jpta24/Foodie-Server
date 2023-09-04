@@ -60,7 +60,7 @@ router.post('/signup', (req, res, next) => {
 				from: 'info@foodys.app',
 				to: user.email,
 				bcc: 'info@foodys.app',
-				subject: 'You successfully created a Foodie account!',
+				subject: 'You successfully created a Foodys account!',
 				html: newUser(user)
 			}
 			
@@ -78,7 +78,7 @@ router.post('/signup', (req, res, next) => {
 		// 	let mailCreateAccount = {
 		// 		from: process.env.MAIL,
 		// 		to: user.email,
-		// 		subject: 'You successfully created a Foodie account!',
+		// 		subject: 'You successfully created a Foodys account!',
 		// 		html: newUser(user),
 		// 	};
 

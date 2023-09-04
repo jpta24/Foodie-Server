@@ -3,23 +3,23 @@ function newUser(user) {
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
                 <div style='padding:10px'>
-                    <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
                         <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                        <h1 style='margin-left:15px'>Foodie</h1>
+                        <h1 style='margin-left:15px'>Foodys</h1>
                     </a>
                 </div>
                 <div style='padding:10px'>
                     <h1 style='margin-top:3px'>Hi ${user.username},</h1>
-                    <p>Welcome to Foodie. </p>
+                    <p>Welcome to Foodys. </p>
                     <div>
                         <div>
                             <div>
                                 <hr/>
-                                <h3>Thanks for signing up for a FREE account.  You can now create a Business to bring your clients to your online store or you can start buying at Foodies businesses. </h3>
+                                <h3>Thanks for signing up for a FREE account.  You can now create a Business to bring your clients to your online store or you can start buying at Foodyss businesses. </h3>
                                 <p>If you didn't sign up for an account please ignore  this email.  Someone probably made a typo and entered your email address on accident.</p>
                                 
                                 <p>Thanks for using our service.</p>
-                                <h3>Foodie.de</h3>
+                                <h3>Foodys</h3>
                             </div>
                         </div>
                     </div>
@@ -35,14 +35,14 @@ function newBusiness(userUpdated, name) {
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
                 <div style='padding:10px'>
-                    <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
                         <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                        <h1 style='margin-left:15px'>Foodie</h1>
+                        <h1 style='margin-left:15px'>Foodys</h1>
                     </a>
                 </div>
                 <div style='padding:10px'>
                     <h1 style='margin-top:3px'>Hi ${userUpdated.username},</h1>
-                    <p>Welcome to Foodie. </p>
+                    <p>Welcome to Foodys. </p>
                     <h3>You have created a business named: <span style='padding-left:10px'>${name}</span></h3>
                     <div>
                         <div>
@@ -52,7 +52,7 @@ function newBusiness(userUpdated, name) {
                                 <p>If you didn't sign up for an account please ignore  this email.  Someone probably made a typo and entered your email address on accident.</p>
                                 
                                 <p>Thanks for using our service.</p>
-                                <h3>Foodie.de</h3>
+                                <h3>Foodys</h3>
                             </div>
                         </div>
                     </div>
@@ -68,9 +68,9 @@ function mailOrderClient(userUpdated, orders, thisOrder, ordNum) {
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
                 <div style='padding:10px'>
-                    <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
                         <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                        <h1 style='margin-left:15px'>Foodie</h1>
+                        <h1 style='margin-left:15px'>Foodys</h1>
                     </a>
                 </div>
                 <div style='padding:10px'>
@@ -120,7 +120,7 @@ function mailOrderClient(userUpdated, orders, thisOrder, ordNum) {
                                 </p>
                                 <hr/>
                                 <p>We hope to see you again soon.</p>
-                                <h3>Foodie.de</h3>
+                                <h3>Foodys</h3>
                             </div>
                         </div>
                     </div>
@@ -136,9 +136,9 @@ function mailOrderBusiness(userUpdated, orders, thisOrder, ordNum) {
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
                 <div style='padding:10px'>
-                    <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
                         <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                        <h1 style='margin-left:15px'>Foodie</h1>
+                        <h1 style='margin-left:15px'>Foodys</h1>
                     </a>
                 </div>
                 <div style='padding:10px'>
@@ -190,7 +190,7 @@ function mailOrderBusiness(userUpdated, orders, thisOrder, ordNum) {
                                 </p>
                                 <hr/>
                                 <p>We hope to see you again soon.</p>
-                                <h3>Foodie.de</h3>
+                                <h3>Foodys</h3>
                             </div>
                         </div>
                     </div>
@@ -206,9 +206,9 @@ function mailStatusClient(thisOrder, ordNum) {
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
                 <div style='padding:10px'>
-                    <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
                         <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                        <h1 style='margin-left:15px'>Foodie</h1>
+                        <h1 style='margin-left:15px'>Foodys</h1>
                     </a>
                 </div>
                 <div style='padding:10px'>
@@ -255,7 +255,7 @@ function mailStatusClient(thisOrder, ordNum) {
                                 </p>
                                 <hr/>
                                 <p>We hope to see you again soon.</p>
-                                <h3>Foodie.de</h3>
+                                <h3>Foodys</h3>
                             </div>
                         </div>
                     </div>
@@ -271,9 +271,9 @@ function mailStatusBusiness(thisOrder, ordNum) {
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
                 <div style='padding:10px'>
-                    <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
                         <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                        <h1 style='margin-left:15px'>Foodie</h1>
+                        <h1 style='margin-left:15px'>Foodys</h1>
                     </a>
                 </div>
                 <div style='padding:10px'>
@@ -320,7 +320,7 @@ function mailStatusBusiness(thisOrder, ordNum) {
                                 </p>
                                 <hr/>
                                 <p>Thanks for using our service.</p>
-                                <h3>Foodie.de</h3>
+                                <h3>Foodys</h3>
                             </div>
                         </div>
                     </div>
@@ -336,9 +336,9 @@ function mailStatusClientBusiness(thisOrder, ordNum) {
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
                 <div style='padding:10px'>
-                    <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
                         <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                        <h1 style='margin-left:15px'>Foodie</h1>
+                        <h1 style='margin-left:15px'>Foodys</h1>
                     </a>
                 </div>
                 <div style='padding:10px'>
@@ -385,7 +385,7 @@ function mailStatusClientBusiness(thisOrder, ordNum) {
                                 </p>
                                 <hr/>
                                 <p>We hope to see you again soon.</p>
-                                <h3>Foodie.de</h3>
+                                <h3>Foodys</h3>
                             </div>
                         </div>
                     </div>
@@ -401,9 +401,9 @@ function mailStatusBusinessBusiness(thisOrder, ordNum) {
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
                 <div style='padding:10px'>
-                    <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
                         <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                        <h1 style='margin-left:15px'>Foodie</h1>
+                        <h1 style='margin-left:15px'>Foodys</h1>
                     </a>
                 </div>
                 <div style='padding:10px'>
@@ -450,7 +450,7 @@ function mailStatusBusinessBusiness(thisOrder, ordNum) {
                                 </p>
                                 <hr/>
                                 <p>Thanks for using our service.</p>
-                                <h3>Foodie.de</h3>
+                                <h3>Foodys</h3>
                             </div>
                         </div>
                     </div>
