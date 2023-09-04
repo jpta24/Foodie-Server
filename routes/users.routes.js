@@ -1,5 +1,7 @@
 const router = require('express').Router();
-const nodemailer = require('nodemailer');
+
+const sendMail = require('../config/nodemailer.config');
+const { mailOrderClient, mailOrderBusiness } = require('../data/mails');
 
 const Business = require('../models/Bussiness.model');
 const User = require('../models/User.model');
@@ -234,173 +236,23 @@ router.put('/order/:userID', (req, res, next) => {
 					})
 					.join(' ');
 
-				const transporter = nodemailer.createTransport({
-					service: 'gmail',
-					auth: {
-						user: process.env.EMAIL,
-						pass: process.env.PASSMAIL,
-					},
-				});
-
-				let mailOrderClient = {
-					from: process.env.MAIL,
+				const mailOptionsClient = {
+					from: 'info@foodys.app',
 					to: userUpdated.email,
-					subject: 'Your Foodie Order',
-					html: `
-                <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
-                    <div>
-                        <div style='padding:10px'>
-                            <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
-                                <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                                <h1 style='margin-left:15px'>Foodie</h1>
-                            </a>
-                        </div>
-                        <div style='padding:10px'>
-                            <h1 style='margin-top:3px'>Hi ${
-															userUpdated.username
-														},</h1>
-                            <p>Thanks for your order with us. We’ll send you a confirmation when the business receives it.</p>
-                            <div>
-                                <div>
-                                    <div>
-                                        <hr/>
-                                        <h3>Details <span style='padding-left:10px'>Order ${ordNum
-																					.slice(10)
-																					.toUpperCase()}</span></h3>
-                                        <p style='font-size:0.95em; font-weight:bolder'>Business: ${
-																					thisOrder.business.name
-																				}</p>
-                                        <div>
-                                            ${orders}
-                                        </div>
-                                        <hr/>
-                                        <h3>Information</h3>
-                                        <p>Name: ${thisOrder.note.name} </p>
-                                        <p>Phone: ${thisOrder.note.phone}</p>
-                                        ${
-																					thisOrder.note.street &&
-																					`<p>Address: ${thisOrder.note.street}</p>`
-																				}
-                                        ${
-																					thisOrder.note.note &&
-																					`<p>Note: ${thisOrder.note.note}</p>`
-																				}
-                                        <p>Delivery Service: ${
-																					thisOrder.format
-																				}</p>
-                                        <hr/>
-                                        <p>Summary: <span style='font-weight: bolder'>${
-																					thisOrder.business.currency
-																				} ${thisOrder.summary.toFixed(
-						2
-					)}</span></p>
-                                        <p>Payment Method: <span style='font-weight: bolder'>${
-																					thisOrder.paymentMethod
-																				}</span></p>
-                                        <p>Order status: <span style='font-weight: bolder'>${
-																					thisOrder.status
-																				}</span> 
-                                        </p>
-                                        <hr/>
-                                        <p>We hope to see you again soon.</p>
-                                        <h3>Foodie.de</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>    
-                    </div>
-                </div>
-                `,
+					subject: 'Your Foodys Order',
+					html: mailOrderClient(userUpdated, orders, thisOrder, ordNum),
 				};
 
-				transporter.sendMail(mailOrderClient, function (error, info) {
-					if (error) {
-						console.log(error);
-					} else {
-						console.log('Email Order to Client sent: ' + info.response);
-					}
-				});
+				sendMail(mailOptionsClient);
 
-				let mailOrderBusiness = {
-					from: process.env.MAIL,
+				const mailOptionsBusiness = {
+					from: 'info@foodys.app',
 					to: thisOrder.business.address.email,
-					subject: 'You recieved a Foodie Order',
-					html: `
-                    <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
-                        <div>
-                            <div style='padding:10px'>
-                                <a href='https://foodie-de.netlify.app/dashboard' style='display:flex; text-decoration: none'>
-                                    <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
-                                    <h1 style='margin-left:15px'>Foodie</h1>
-                                </a>
-                            </div>
-                            <div style='padding:10px'>
-                                <h1 style='margin-top:3px'>Hi ${
-																	thisOrder.business.name
-																},</h1>
-                                <p>You have received an order, please check it and confirm it to let the client know everything is Ok. </p>
-                                <div>
-                                    <div>
-                                        <div>
-                                            <hr/>
-                                            <h3>Details <span style='padding-left:10px'>Order ${ordNum
-																							.slice(10)
-																							.toUpperCase()}</span></h3>
-                                            <p style='font-size:0.95em; font-weight:bolder'>User: ${
-																							userUpdated.username
-																						}</p>
-                                            <div>
-                                                ${orders}
-                                            </div>
-                                            <hr/>
-                                            <h3>Information</h3>
-                                            <p>Name: ${thisOrder.note.name} </p>
-                                            <p>Phone: ${
-																							thisOrder.note.phone
-																						}</p>
-                                            ${
-																							thisOrder.note.street &&
-																							`<p>Address: ${thisOrder.note.street}</p>`
-																						}
-                                            ${
-																							thisOrder.note.note &&
-																							`<p>Note: ${thisOrder.note.note}</p>`
-																						}
-                                            <p>Delivery Service: ${
-																							thisOrder.format
-																						}</p>
-                                            <hr/>
-                                            <p>Summary: <span style='font-weight: bolder'>${
-																							thisOrder.business.currency
-																						} ${thisOrder.summary.toFixed(
-						2
-					)}</span></p>
-                                            <p>Payment Method: <span style='font-weight: bolder'>${
-																							thisOrder.paymentMethod
-																						}</span></p>
-                                            <p>Order status: <span style='font-weight: bolder'>${
-																							thisOrder.status
-																						}</span> 
-                                            </p>
-                                            <hr/>
-                                            <p>Thanks for using our service.</p>
-                                            <h3>Foodie.de</h3>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    `,
+					subject: 'You recieved a Foodys Order',
+					html: mailOrderBusiness(userUpdated, orders, thisOrder, ordNum),
 				};
 
-				transporter.sendMail(mailOrderBusiness, function (error, info) {
-					if (error) {
-						console.log(error);
-					} else {
-						console.log('Email Order to Business sent: ' + info.response);
-					}
-				});
+				sendMail(mailOptionsBusiness);
 
 				res.status(200).json(userUpdated);
 			})
