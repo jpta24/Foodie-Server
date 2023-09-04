@@ -60,7 +60,7 @@ router.post('/webmessage', async (req, res, next) => {
 	res.status(201).send({ message: 'Mensaje Enviado' });
 });
 
-router.post('/webfoddys', async (req, res, next) => {
+router.post('/webfoodys', async (req, res, next) => {
 	const { nombre, correo } = req.body;
 
 	const mailOptions = {
