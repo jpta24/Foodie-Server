@@ -222,7 +222,7 @@ router.put('/order/:userID', (req, res, next) => {
 					$push: { orders: orderID },
 				});
 			})
-			.then(() => {
+			.then(async () => {
 				const thisOrder = userUpdated.orders[userUpdated.orders.length - 1];
 				const ordNum = thisOrder._id + '';
 				const orders = thisOrder.products
@@ -237,22 +237,22 @@ router.put('/order/:userID', (req, res, next) => {
 					.join(' ');
 
 				const mailOptionsClient = {
-					from: 'info@foodys.app',
+					from: 'FOODYS APP <info@foodys.app>',
 					to: userUpdated.email,
 					subject: 'Your Foodys Order',
 					html: mailOrderClient(userUpdated, orders, thisOrder, ordNum),
 				};
 
-				sendMail(mailOptionsClient);
+				await sendMail(mailOptionsClient);
 
 				const mailOptionsBusiness = {
-					from: 'info@foodys.app',
+					from: 'FOODYS APP <info@foodys.app>',
 					to: thisOrder.business.address.email,
 					subject: 'You recieved a Foodys Order',
 					html: mailOrderBusiness(userUpdated, orders, thisOrder, ordNum),
 				};
 
-				sendMail(mailOptionsBusiness);
+				await sendMail(mailOptionsBusiness);
 
 				res.status(200).json(userUpdated);
 			})

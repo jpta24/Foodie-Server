@@ -23,7 +23,7 @@ router.put('/status/:orderID', (req, res, next) => {
 				path: 'product',
 			},
 		})
-		.then((updatedOrder) => {
+		.then(async (updatedOrder) => {
 			const thisOrder = updatedOrder;
 			const ordNum = thisOrder._id + '';
 			const orders = thisOrder.products
@@ -38,7 +38,7 @@ router.put('/status/:orderID', (req, res, next) => {
 				.join(' ');
 			// Mail to Client when Client Change Order Status
 			const mailOptionsStatusClient = {
-				from: 'info@foodys.app',
+				from: 'FOODYS APP <info@foodys.app>',
 				to: thisOrder.user.email,
 				subject: `You have ${thisOrder.status.toUpperCase()} your Foodys Order ${ordNum
 					.slice(10)
@@ -46,11 +46,11 @@ router.put('/status/:orderID', (req, res, next) => {
 				html: mailStatusClient(thisOrder, ordNum),
 			};
 
-			sendMail(mailOptionsStatusClient);
+			await sendMail(mailOptionsStatusClient);
 
 			// Mail to Business when Client Change Order Status
 			const mailOptionsStatusBusiness = {
-				from: 'info@foodys.app',
+				from: 'FOODYS APP <info@foodys.app>',
 				to: thisOrder.business.address.email,
 				subject: `Client has ${thisOrder.status.toUpperCase()} your Foodys Order ${ordNum
 					.slice(10)
@@ -58,7 +58,7 @@ router.put('/status/:orderID', (req, res, next) => {
 				html: mailStatusBusiness(thisOrder, ordNum),
 			};
 
-			sendMail(mailOptionsStatusBusiness);
+			await sendMail(mailOptionsStatusBusiness);
 
 			return User.findById(updatedOrder.user._id)
 				.populate('business')
@@ -107,7 +107,7 @@ router.put('/statusBusiness/:orderID', (req, res, next) => {
 				path: 'product',
 			},
 		})
-		.then((updatedOrder) => {
+		.then(async (updatedOrder) => {
 			const thisOrder = updatedOrder;
 			const ordNum = thisOrder._id + '';
 			const orders = thisOrder.products
@@ -123,7 +123,7 @@ router.put('/statusBusiness/:orderID', (req, res, next) => {
 
 			// Mail to Client when Business Change Order Status
 			const mailOptionsStatusClient = {
-				from: 'info@foodys.app',
+				from: 'FOODYS APP <info@foodys.app>',
 				to: thisOrder.user.email,
 				subject: `${
 					thisOrder.business.name
@@ -133,11 +133,11 @@ router.put('/statusBusiness/:orderID', (req, res, next) => {
 				html: mailStatusClientBusiness(thisOrder, ordNum),
 			};
 
-			sendMail(mailOptionsStatusClient);
+			await sendMail(mailOptionsStatusClient);
 
 			// Mail to Business when Business Change Order Status
 			const mailOptionsStatusBusiness = {
-				from: 'info@foodys.app',
+				from: 'FOODYS APP <info@foodys.app>',
 				to: thisOrder.business.address.email,
 				subject: `You have ${thisOrder.status.toUpperCase()} Order ${ordNum
 					.slice(10)
@@ -145,7 +145,7 @@ router.put('/statusBusiness/:orderID', (req, res, next) => {
 				html: mailStatusBusinessBusiness(thisOrder, ordNum),
 			};
 
-			sendMail(mailOptionsStatusBusiness);
+			await sendMail(mailOptionsStatusBusiness);
 
 			return Business.findById(updatedOrder.business)
 				.populate('products')

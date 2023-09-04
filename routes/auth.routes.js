@@ -47,7 +47,7 @@ router.post('/signup', (req, res, next) => {
 			// We return a pending promise, which allows us to chain another `then`
 			return User.create({ username, password: hashedPassword, email, rol, lang, terms });
 		})
-		.then((createdUser) => { 
+		.then(async (createdUser) => { 
 			// Deconstruct the newly created user object to omit the password
 			// We should never expose passwords publicly
 			const { username, email, rol, _id } = createdUser;
@@ -57,14 +57,14 @@ router.post('/signup', (req, res, next) => {
 
 			// Send email confirmation create an account
 			const mailOptions = {
-				from: 'info@foodys.app',
+				from: 'FOODYS APP <info@foodys.app>',
 				to: user.email,
 				bcc: 'info@foodys.app',
 				subject: 'You successfully created a Foodys account!',
 				html: newUser(user)
 			}
 			
-			sendMail(mailOptions);
+			await sendMail(mailOptions);
 						
 			res.status(201).json({ user: user });
 

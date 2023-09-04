@@ -8,7 +8,7 @@ const User = require('../models/User.model');
 
 const { isAuthenticated } = require('../middleware/jwt.middleware');
 
-router.post('/', isAuthenticated, (req, res, next) => {
+router.post('/', isAuthenticated, async (req, res, next) => {
 	const { buz } = req.body;
 
 	const {
@@ -108,17 +108,17 @@ router.post('/', isAuthenticated, (req, res, next) => {
 				{ business: business._id, rol: 'admin' },
 				{ new: true }
 			)
-				.then((userUpdated) => {
+				.then(async (userUpdated) => {
 					// Send email confirmation create a Business
 					const mailOptions = {
-						from: 'info@foodys.app',
+						from: 'FOODYS APP <info@foodys.app>',
 						to: address.email,
 						subject: 'You successfully created a Foodys Business account!',
 						bcc: 'info@foodys.app',
 						html: newBusiness(userUpdated, name),
 					};
 
-					sendMail(mailOptions);
+					await sendMail(mailOptions);
 
 					res.status(201).json({ business: business });
 				})
