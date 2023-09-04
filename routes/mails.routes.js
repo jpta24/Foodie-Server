@@ -70,7 +70,7 @@ router.post('/webfoodys', async (req, res, next) => {
 		html: infoNewUser(nombre,correo)
 	}
 	
-	sendMail(mailOptions);
+	await sendMail(mailOptions);
 	
 	res.status(201).json({ message: 'Mensaje Enviado' });
 
