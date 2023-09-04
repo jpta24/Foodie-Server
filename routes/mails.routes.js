@@ -50,10 +50,10 @@ router.post('/webmessage', (req, res, next) => {
 	});
 
 	// Send a json response containing the user object
-	res.status(201).send({ message:'Mensaje Enviado' });
+	res.status(201).send({ message: 'Mensaje Enviado' });
 });
 
-router.post('/webfoddys', (req, res, next) => {
+router.post('/webfoddys', async (req, res, next) => {
 	const { nombre, correo } = req.body;
 	// Send email confirmation create an account
 	const transporter = nodemailer.createTransport({
@@ -69,7 +69,6 @@ router.post('/webfoddys', (req, res, next) => {
 			user: process.env.EMAIL,
 			pass: process.env.PASSMAIL,
 		},
-		
 	});
 	let mailCreateAccount = {
 		from: 'info@foodys.app',
@@ -98,16 +97,27 @@ router.post('/webfoddys', (req, res, next) => {
           `,
 	};
 
-	transporter.sendMail(mailCreateAccount, function (error, info) {
-		if (error) {
-			console.log(error);
-		} else {
-			console.log('Email Create Account sent: ' + info.response);
-		}
+	// transporter.sendMail(mailCreateAccount, function (error, info) {
+	// 	if (error) {
+	// 		console.log(error);
+	// 	} else {
+	// 		console.log('Email Create Account sent: ' + info.response);
+	// 	}
+	// });
+	await new Promise((resolve, reject) => {
+		transporter.sendMail(mailCreateAccount, (err, info) => {
+			if (err) {
+				console.error(err);
+				reject(err);
+			} else {
+				console.log('Email Create Account sent: ' + info.response);
+				resolve(info);
+			}
+		});
 	});
 
 	// Send a json response containing the user object
-	res.status(201).send({ message:'Mensaje Enviado' });
+	res.status(201).send({ message: 'Mensaje Enviado' });
 });
 
 module.exports = router;
