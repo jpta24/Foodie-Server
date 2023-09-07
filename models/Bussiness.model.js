@@ -71,14 +71,24 @@ const businessSchema = new Schema(
 			},
 		],
 		pdfMenuUrl: String,
-		membership: {
+		membership: [{
 			plan: {
 				type: String,
-				enum: ['trial', 'free', 'basic', 'premium'],
+				enum: ['trial', 'free', 'basic', 'premium','menu','web'],
 			},
 			usedTrial: Boolean,
-			updated: Date
-		},
+			updated: Date,
+			dateStart:Date,
+			dateNextPayment:Date,
+			price:Number,
+			currency:String,
+			invoiceNotified:Boolean,
+			status: {
+				type: String,
+				enum: ['pending', 'payed','confirmed'],
+			},
+		}],
+		isActive: Boolean,
 		currency: String,
 		orders: [
 			{
@@ -93,6 +103,10 @@ const businessSchema = new Schema(
 			},
 		],
 		timesSaved: Number,
+		invoices:[{
+			type: Schema.Types.ObjectId,
+			ref:'Invoice'
+		}]
 	},
 	{
 		versionKey: false,

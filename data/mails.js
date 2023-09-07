@@ -486,6 +486,90 @@ function infoNewUser(nombre,correo) {
 	return mailText;
 }
 
+function accountInactiveInvoicePayment(business,invoice) {
+	const mailText = `
+        <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
+            <div>
+                <div style='padding:10px'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
+                        <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
+                        <h1 style='margin-left:15px'>Foodys</h1>
+                    </a>
+                </div>
+                <div style='padding:10px'>
+                    <h1 style='margin-top:3px'>Hi ${business.name},</h1>
+                    <p>We do not have good news. </p>
+                    <div>
+                        <div>
+                            <div>
+                                <hr/>
+                                <h3>We would like to inform you that your account with us is currently marked as inactive due to an outstanding invoice (Invoice Number: ${invoice}) that has not been paid.</h3>
+                                <p>To reactivate your account and continue enjoying our services, please click on the following link to make the payment and bring your account up to date:</p>
+                                <hr/>
+                                <div>
+                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/invoice/${invoice}', '_blank')'>Make Payment</button>
+                                </div>
+                                <hr/>                                
+                                <p>Please note that your access to certain features and benefits may be restricted until the payment is successfully processed.</p>
+                                <hr/>                                
+                                <p>If you have any questions or need assistance with the payment process, please do not hesitate to contact our support team at info@foodys.app. We are here to help you resolve any concerns you may have.</p> 
+                                <hr/>                                
+                                <p>Thank you for choosing FOODYS APP. We value your continued partnership and look forward to serving you.</p>
+                                <h3>Foodys</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+	return mailText;
+}
+
+function notificationNewInvoice(business,invoice,amount) {
+	const mailText = `
+        <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
+            <div>
+                <div style='padding:10px'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
+                        <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
+                        <h1 style='margin-left:15px'>Foodys</h1>
+                    </a>
+                </div>
+                <div style='padding:10px'>
+                    <h1 style='margin-top:3px'>Hi ${business.name},</h1>
+                    <p>You are doing well.</p>
+                    <div>
+                        <div>
+                            <div>
+                                <hr/>
+                                <h3>We would like to inform you that a new invoice (Invoice Number: ${invoice}) has been generated for your account.</h3>
+                                <p>This invoice must be paid by the due date (${nextDatePayment})  to avoid any delays or disruptions to your business.</p>
+                                <hr/>
+                                <p>Invoice Details:</p>
+                                <p>- Invoice Number: ${invoice} </p>
+                                <p>- Amount Due: ${amount}.</p>
+                                <p>- Due Date: ${nextDatePayment}.</p>
+                                <hr/>                                
+                                <p>To ensure uninterrupted service and prevent any inconveniences, please click on the following link to make the payment:</p>
+                                <hr/> 
+                                <div>
+                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/invoice/${invoice}', '_blank')'>Make Payment</button>
+                                </div>
+                                <hr/>                                
+                                <p>We kindly request that you complete the payment before the due date mentioned above. If you have any questions or require assistance with the payment process, please do not hesitate to contact our support team at info@foodys.app. We are here to assist you with any concerns you may have.</p>
+                                <hr/>                           
+                                <p>Thank you for choosing FOODYS APP. We value your continued partnership and look forward to serving you.</p>
+                                <h3>Foodys</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+	return mailText;
+}
 
 //AGREGAR NUEVA FUNCION Y RECORDAR EXPORTARLA
 
@@ -499,5 +583,7 @@ module.exports = {
 	mailStatusBusiness,
 	mailStatusClientBusiness,
 	mailStatusBusinessBusiness,
-    infoNewUser
+    infoNewUser,
+    accountInactiveInvoicePayment,
+    notificationNewInvoice
 };

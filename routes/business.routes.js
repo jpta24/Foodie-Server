@@ -1,12 +1,92 @@
 const router = require('express').Router();
 
 const sendMail = require('../config/nodemailer.config');
-const { newBusiness } = require('../data/mails');
+
+const { newBusiness,accountInactiveInvoicePayment,notificationNewInvoice } = require('../data/mails');
+const membershipsData = require('../data/memberships.json');
+
 
 const Business = require('../models/Bussiness.model');
 const User = require('../models/User.model');
+const Invoice = require('../models/Invoice.model');
 
 const { isAuthenticated } = require('../middleware/jwt.middleware');
+
+// Función principal que se ejecutará una vez al día
+const checkMembership = async () =>{
+// async function verificarMembresias() {
+	const currentDate = new Date();
+
+	const businesses = await Business.find().populate('invoices').select('invoices name membership status address');
+
+	businesses.forEach(async (business) => {
+		// Verifica si la fecha de vencimiento ha pasado
+		if (
+			business.membership.reverse()[0].dateNextPayment < currentDate &&
+			business.isActive
+		) {
+			// business.status = 'inactive';
+			// await business.save();
+			await Business.findByIdAndUpdate(business._id, { isActive:false });
+
+			const invoicePending = business.invoices.filter((invoice) => invoice.status === 'pending').reverse()[0]
+
+			// Send email 
+			const mailOptions = {
+				from: 'FOODYS APP <info@foodys.app>',
+				to: business.address.email,
+				subject: 'Foodys Account Status Update',
+				html: accountInactiveInvoicePayment(business,invoicePending),
+			};
+
+			await sendMail(mailOptions);
+		}
+
+		// Verifica si faltan menos de 5 días para la fecha de vencimiento y aún no se ha notificado
+		const remainDays = Math.floor(
+			(business.membership.reverse()[0].nextDatePayment - currentDate) / (1000 * 60 * 60 * 24)
+		);
+		if (remainDays <= 5 && !business.membership.reverse()[0].invoiceNotified) {
+			const plan = membershipsData[0][business.membership.reverse()[0].plan]
+			
+			const newInvoice = {
+				business: business._id,
+				charge: [
+					{
+						concept: `Membership`,
+						description: `Monthly Membership Fee for your ${plan.name} Plan`,
+						price: `$${plan.price['usd']}`,
+					},
+				],
+				status: 'pending',
+			}; 
+			// Debes implementar esta función
+			const newInvoiceCreated = await Invoice.create(newInvoice)
+
+			business.membership[business.membership.length - 1].invoiceNotified = true
+
+			business.invoices.push(newInvoiceCreated);
+
+			await business.save();
+
+			// Send email 
+			const mailOptions = {
+				from: 'FOODYS APP <info@foodys.app>',
+				to: business.address.email,
+				subject: 'New Foodys Invoice Generated - Action Required',
+				html: notificationNewInvoice(business,newInvoiceCreated),
+			};
+
+			await sendMail(mailOptions);
+		}
+	});
+}
+const checking = () =>{
+	console.log('new')
+}
+// checking()
+// setInterval(checkMembership, 24 * 60 * 60 * 1000); 
+// setInterval(checking,10000)
 
 router.post('/', isAuthenticated, async (req, res, next) => {
 	const { buz } = req.body;
