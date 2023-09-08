@@ -17,7 +17,7 @@ const checkMembership = async () =>{
 // async function verificarMembresias() {
 	const currentDate = new Date();
 
-	const businesses = await Business.find().populate('invoices').select('invoices name membership status address');
+	const businesses = await Business.find().populate('invoices').select('invoices name membership isActive address');
 
 	businesses.forEach(async (business) => {
 		// Verifica si la fecha de vencimiento ha pasado
@@ -82,11 +82,85 @@ const checkMembership = async () =>{
 	});
 }
 const checking = () =>{
-	console.log('new')
+	const currentDate = new Date();
+	const nextCheck = new Date();
+		nextCheck.setHours(9, 0, 0, 0);
+	
+		let diff = nextCheck - currentDate;
+	
+	if (diff < 0) {
+	  nextCheck.setDate(nextCheck.getDate() + 1); 
+	  diff = nextCheck - currentDate;
+	}
+
+	// console.log((diff / 3600000).toFixed(2));
+	setTimeout(() => {
+		console.log(`Checking Memberships Activated at: ${new Date}`)
+		// setInterval(checkMembership, 24 * 60 * 60 * 1000)
+	  }, diff);
 }
-// checking()
-// setInterval(checkMembership, 24 * 60 * 60 * 1000); 
-// setInterval(checking,10000)
+
+checking()
+
+const testFuntion = async () => {
+	const currentDate = new Date();
+	const memb = {
+		plan: 'basic',
+		usedTrial: false,
+		updated: {
+			"$date": "2023-07-10T18:05:00.518Z"
+		  },
+		dateStart: {
+			"$date": "2022-10-03T13:23:19.649Z"
+		  },
+		dateNextPayment:{
+			"$date": "2023-09-05T13:23:19.649Z"
+		  },
+		price:0,
+		currency:'$',
+		invoiceNotified:false,
+		status:'notCreated',
+	}
+	// console.log({next:memb.dateNextPayment,current:currentDate});
+	// console.log(memb.dateNextPayment < currentDate);
+	
+	const businesses = await Business.find().populate('invoices').select('invoices name membership isActive address');
+
+	businesses.forEach(async (business) => {
+		// console.log({name:business.name, date:business.membership.reverse()[0].dateNextPayment});
+		if (
+			business.membership.reverse()[0].dateNextPayment < currentDate &&
+			business.isActive 
+			// && false
+		) {
+			// await Business.findByIdAndUpdate(business._id, { isActive:false })
+			console.log({name:business.name, date:business.membership.reverse()[0].dateNextPayment,isActive:business.isActive, isNotified:business.membership.reverse()[0].invoiceNotified});
+			const plan = membershipsData[0][business.membership.reverse()[0].plan]
+			// console.log(plan);
+			// const newInvoice = {
+			// 	business: business._id,
+			// 	charge: [
+			// 		{
+			// 			concept: `Membership`,
+			// 			description: `Monthly Membership Fee for your ${plan.name} Plan`,
+			// 			price: `$${plan.price['usd']}`,
+			// 		},
+			// 	],
+			// 	status: 'pending',
+			// }; 
+			// // Debes implementar esta función
+			// const newInvoiceCreated = await Invoice.create(newInvoice)
+
+			// business.membership[business.membership.length - 1].invoiceNotified = true
+
+			// business.invoices.push(newInvoiceCreated);
+
+			// await business.save();
+		}
+	})
+	
+}
+testFuntion()
 
 router.post('/', isAuthenticated, async (req, res, next) => {
 	const { buz } = req.body;

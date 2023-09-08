@@ -1,46 +1,53 @@
 [
 	{
 		"trial": {
-            "name":"Trial",
-            "price":{
-                "usd":0,
-                "eur":0
-            }
-        },
-        "free": {
-            "name":"Free",
-            "price":{
-                "usd":0,
-                "eur":0
-            }
-        },
-        "basic": {
-            "name":"Basic",
-            "price":{
-                "usd":3,
-                "eur":3
-            }
-        },
-        "premium": {
-            "name":"Premium",
-            "price":{
-                "usd":5,
-                "eur":5
-            }
-        },
-        "menu": {
-            "name":"Menu",
-            "price":{
-                "usd":3,
-                "eur":3
-            }
-        },
-        "web": {
-            "name":"MyWeb",
-            "price":{
-                "usd":85,
-                "eur":80
-            }
-        }
+			"name": "Trial",
+			"price": {
+				"usd": 0,
+				"eur": 0
+			}
+		},
+		"free": {
+			"name": "Free",
+			"price": {
+				"usd": 0,
+				"eur": 0
+			}
+		},
+		"basic": {
+			"name": "Basic",
+			"price": {
+				"usd": 3,
+				"eur": 3
+			}
+		},
+		"premium": {
+			"name": "Premium",
+			"price": {
+				"usd": 5,
+				"eur": 5
+			}
+		},
+		"menu": {
+			"name": "Menu",
+			"price": {
+				"usd": 3,
+				"eur": 3
+			}
+		},
+		"web": {
+			"name": "MyWeb",
+			"price": {
+				"usd": 85,
+				"eur": 80
+			}
+		},
+		"demo": {
+			"name": "Demo",
+			"price": {
+				"usd": 0,
+				"eur": 0
+			}
+		}
 	}
 ]

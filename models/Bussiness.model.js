@@ -74,7 +74,7 @@ const businessSchema = new Schema(
 		membership: [{
 			plan: {
 				type: String,
-				enum: ['trial', 'free', 'basic', 'premium','menu','web'],
+				enum: ['trial', 'free', 'basic', 'premium','menu','web','demo'],
 			},
 			usedTrial: Boolean,
 			updated: Date,
@@ -85,7 +85,7 @@ const businessSchema = new Schema(
 			invoiceNotified:Boolean,
 			status: {
 				type: String,
-				enum: ['pending', 'payed','confirmed'],
+				enum: ['auto','notCreated','pending', 'payed','confirmed'],
 			},
 		}],
 		isActive: Boolean,
