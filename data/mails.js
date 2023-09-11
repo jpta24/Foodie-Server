@@ -526,7 +526,20 @@ function accountInactiveInvoicePayment(business,invoice) {
 	return mailText;
 }
 
-function notificationNewInvoice(business,invoice,amount) {
+function notificationNewInvoice(business,invoice) {
+    const invoiceNumber = (invoice._id+'').slice(10).toUpperCase()
+    const amount = invoice.charge.map(elem =>elem.price).reduce((acc, val) => {
+        return acc + val;
+    })
+    .toFixed(2);
+    function formatDateToDDMMYYYY(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+        const year = date.getFullYear();
+      
+        return `${day}/${month}/${year}`;
+      }
+
 	const mailText = `
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
@@ -543,24 +556,24 @@ function notificationNewInvoice(business,invoice,amount) {
                         <div>
                             <div>
                                 <hr/>
-                                <h3>We would like to inform you that a new invoice (Invoice Number: ${invoice}) has been generated for your account.</h3>
-                                <p>This invoice must be paid by the due date (${nextDatePayment})  to avoid any delays or disruptions to your business.</p>
-                                <hr/>
+                                <h3>We would like to inform you that a new invoice (Invoice Number: ${invoiceNumber}) has been generated for your account.</h3>
+                                <p>This invoice must be paid by the due date (${formatDateToDDMMYYYY(invoice.dateForPayment)})  to avoid any delays or disruptions to your business.</p>
+                                <br/>
                                 <p>Invoice Details:</p>
-                                <p>- Invoice Number: ${invoice} </p>
+                                <p>- Invoice Number: ${invoiceNumber} </p>
                                 <p>- Amount Due: ${amount}.</p>
-                                <p>- Due Date: ${nextDatePayment}.</p>
+                                <p>- Due Date: $${formatDateToDDMMYYYY(invoice.dateForPayment)}.</p>
                                 <hr/>                                
                                 <p>To ensure uninterrupted service and prevent any inconveniences, please click on the following link to make the payment:</p>
-                                <hr/> 
+                                <br/> 
                                 <div>
-                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/invoice/${invoice}', '_blank')'>Make Payment</button>
+                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/invoice/${invoice._id}', '_blank')'>Make Payment</button>
                                 </div>
-                                <hr/>                                
+                                <br/>                                
                                 <p>We kindly request that you complete the payment before the due date mentioned above. If you have any questions or require assistance with the payment process, please do not hesitate to contact our support team at info@foodys.app. We are here to assist you with any concerns you may have.</p>
                                 <hr/>                           
                                 <p>Thank you for choosing FOODYS APP. We value your continued partnership and look forward to serving you.</p>
-                                <h3>Foodys</h3>
+                                <h3>Foodys App</h3>
                             </div>
                         </div>
                     </div>

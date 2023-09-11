@@ -17,6 +17,7 @@ const invoiceSchema = new Schema(
             type: String,
             enum: ['pending', 'payed','confirmed'],
         },
+        dateForPayment:Date
 	},
 	{
 		versionKey: false,
