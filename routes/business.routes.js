@@ -21,27 +21,26 @@ const checkMembership = async () =>{
 
 	businesses.forEach(async (business) => {
 		
-		// // Verifica si la fecha de vencimiento ha pasado
-		// if (
-		// 	business.membership.reverse()[0].dateNextPayment < currentDate &&
-		// 	business.isActive
-		// ) {
-		// 	// business.status = 'inactive';
-		// 	// await business.save();
-		// 	await Business.findByIdAndUpdate(business._id, { isActive:false });
-
-		// 	const invoicePending = business.invoices.filter((invoice) => invoice.status === 'pending').reverse()[0]
-
-		// 	// Send email 
-		// 	const mailOptions = {
-		// 		from: 'FOODYS APP <info@foodys.app>',
-		// 		to: business.address.email,
-		// 		subject: 'Foodys Account Status Update',
-		// 		html: accountInactiveInvoicePayment(business,invoicePending),
-		// 	};
-
-		// 	await sendMail(mailOptions);
-		// }
+			////////////////////////////// VERIFICACION SI YA PASO FECHA DE PAGO
+			if (
+				business.membership.reverse()[0].dateNextPayment < currentDate &&
+				business.isActive 
+				// && false
+			) {
+				business.isActive = false
+				await business.save()
+	
+				const invoicePending = business.invoices.filter((invoice) => invoice.status === 'pending').reverse()[0]
+					// Send email 
+				const mailOptions = {
+					from: 'FOODYS APP <info@foodys.app>',
+					to: business.address.email,
+					subject: 'Foodys Account Status Update',
+					html: accountInactiveInvoicePayment(business,invoicePending),
+				};
+	
+				await sendMail(mailOptions);
+			}
 
 		////////////////////////////// VERIFICACION ESTA A MENOS DE 5 DIAS, NO NOTIFICADO, ACTIVO
 		const remainDays = Math.floor(
@@ -94,84 +93,13 @@ const checking = () =>{
 	  diff = nextCheck - currentDate;
 	}
 
-	// console.log((diff / 3600000).toFixed(2));
 	setTimeout(() => {
 		console.log(`Checking Memberships Activated at: ${new Date}`)
-		// setInterval(checkMembership, 24 * 60 * 60 * 1000)
+		setInterval(checkMembership, 24 * 60 * 60 * 1000)
 	  }, diff);
 }
 
 checking()
-
-const testFuntion = async () => {
-	const currentDate = new Date();
-	
-	// const memb = {
-	// 	plan: 'basic',
-	// 	usedTrial: false,
-	// 	updated: {
-	// 		"$date": "2023-07-10T18:05:00.518Z"
-	// 	  },
-	// 	dateStart: {
-	// 		"$date": "2022-10-03T13:23:19.649Z"
-	// 	  },
-	// 	dateNextPayment:{
-	// 		"$date": "2023-09-05T13:23:19.649Z"
-	// 	  },
-	// 	price:0,
-	// 	currency:'$',
-	// 	invoiceNotified:false,
-	// 	status:'notCreated',
-	// }
-	// console.log({next:memb.dateNextPayment,current:currentDate});
-	// console.log(memb.dateNextPayment < currentDate);
-	
-	const businesses = await Business.find().populate('invoices').select('invoices name membership isActive address');
-
-	businesses.forEach(async (business) => {
-		const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Nov','Dic']
-		const plan = membershipsData[0][business.membership.reverse()[0].plan]
-		const month = months[business.membership.reverse()[0].dateNextPayment.getMonth()]
-
-			////////////////////////////// VERIFICACION SI YA PASO FECHA DE PAGO
-		if (
-			business.membership.reverse()[0].dateNextPayment < currentDate &&
-			business.isActive 
-			&& false
-		) {
-		
-			// await Business.findByIdAndUpdate(business._id, { isActive:false })
-			// console.log({name:business.name, date:business.membership.reverse()[0].dateNextPayment,isActive:business.isActive, isNotified:business.membership.reverse()[0].invoiceNotified});
-			
-			const newInvoice = {
-				business: business._id,
-				charge: [
-					{
-						concept: `Membership`,
-						description: `Monthly Membership Fee for your ${plan.name} Plan for ${month}`,
-						price: `$${plan.price['usd']}`,
-					},
-				],
-				status: 'pending',
-			}; 
-			// console.log(newInvoice);
-
-
-			// // Debes implementar esta función
-			// const newInvoiceCreated = await Invoice.create(newInvoice)
-
-			// business.membership[business.membership.length - 1].invoiceNotified = true
-
-			// business.invoices.push(newInvoiceCreated);
-
-			// await business.save();
-		}
-	
-
-	})
-	
-}
-testFuntion()
 
 router.post('/', isAuthenticated, async (req, res, next) => {
 	const { buz } = req.body;

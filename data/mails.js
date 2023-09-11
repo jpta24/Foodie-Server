@@ -487,6 +487,7 @@ function infoNewUser(nombre,correo) {
 }
 
 function accountInactiveInvoicePayment(business,invoice) {
+    const invoiceNumber = (invoice._id+'').slice(10).toUpperCase()
 	const mailText = `
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
@@ -503,19 +504,19 @@ function accountInactiveInvoicePayment(business,invoice) {
                         <div>
                             <div>
                                 <hr/>
-                                <h3>We would like to inform you that your account with us is currently marked as inactive due to an outstanding invoice (Invoice Number: ${invoice}) that has not been paid.</h3>
+                                <h3>We would like to inform you that your account with us is currently marked as inactive due to an outstanding invoice (Invoice Number: ${invoiceNumber}) that has not been paid.</h3>
                                 <p>To reactivate your account and continue enjoying our services, please click on the following link to make the payment and bring your account up to date:</p>
-                                <hr/>
+                                <br/>
                                 <div>
-                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/invoice/${invoice}', '_blank')'>Make Payment</button>
+                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/invoice/${invoice._id}', '_blank')'>Make Payment</button>
                                 </div>
                                 <hr/>                                
                                 <p>Please note that your access to certain features and benefits may be restricted until the payment is successfully processed.</p>
-                                <hr/>                                
+                                <br/>                                
                                 <p>If you have any questions or need assistance with the payment process, please do not hesitate to contact our support team at info@foodys.app. We are here to help you resolve any concerns you may have.</p> 
                                 <hr/>                                
                                 <p>Thank you for choosing FOODYS APP. We value your continued partnership and look forward to serving you.</p>
-                                <h3>Foodys</h3>
+                                <h3>Foodys App</h3>
                             </div>
                         </div>
                     </div>
