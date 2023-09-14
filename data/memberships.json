@@ -5,35 +5,65 @@
 			"price": {
 				"usd": 0,
 				"eur": 0
-			}
+			},
+			"comision":1,
+			"maxProducts":10000000,
+			"maxHighlighted":10000000,
+			"monthlySales":100000000000,
+			"ads":false,
+			"payment":["zelle","cash","card","pp","pagoMovil","other"]
 		},
 		"free": {
 			"name": "Free",
 			"price": {
 				"usd": 0,
 				"eur": 0
-			}
+			},
+			"comision":5,
+			"maxProducts":10,
+			"maxHighlighted":3,
+			"monthlySales":500,
+			"ads":true,
+			"payment":["zelle","cash","pagoMovil","other"]
 		},
 		"basic": {
 			"name": "Basic",
 			"price": {
 				"usd": 3,
 				"eur": 3
-			}
+			},
+			"comision":2,
+			"maxProducts":50,
+			"maxHighlighted":10,
+			"monthlySales":2000,
+			"ads":false,
+			"payment":["zelle","cash","card","pp","pagoMovil","other"]
 		},
 		"premium": {
 			"name": "Premium",
 			"price": {
 				"usd": 5,
 				"eur": 5
-			}
+			},
+			"comision":1,
+			"maxProducts":10000000,
+			"maxHighlighted":10000000,
+			"monthlySales":100000000000,
+			"ads":false,
+			"payment":["zelle","cash","card","pp","pagoMovil","other"]
 		},
 		"menu": {
 			"name": "Menu",
 			"price": {
-				"usd": 3,
-				"eur": 3
-			}
+				"usd": 5,
+				"eur": 5
+			},
+			"comision":0,
+			"maxProducts":10000000,
+			"maxHighlighted":10000000,
+			"monthlySales":10000000,
+			"ads":false,
+			"payment":[]
 		},
 		"web": {
 			"name": "MyWeb",
@@ -47,7 +77,13 @@
 			"price": {
 				"usd": 0,
 				"eur": 0
-			}
+			},
+			"comision":0,
+			"maxProducts":10000000,
+			"maxHighlighted":10000000,
+			"monthlySales":100000000000,
+			"ads":false,
+			"payment":["zelle","cash","card","pp","pagoMovil","other"]
 		}
 	}
 ]

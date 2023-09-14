@@ -1,24 +1,34 @@
 const { Schema, model } = require('mongoose');
 
-const invoiceSchema = new Schema(
+const conceptSchema = new Schema(
 	{
 		business: {
 			type: Schema.Types.ObjectId,
 			ref: 'Business',
 		},
-		concepts:{
+		code: String,
+		concept: String,
+		description: String,
+		orders: {
+			payed: [
+				{
 					type: Schema.Types.ObjectId,
-					ref: 'Conpcept',
+					ref: 'Order',
 				},
+			],
+			notPayed: [
+				{
+					type: Schema.Types.ObjectId,
+					ref: 'Order',
+				},
+			],
+		},
+		price: Number,
 		status: {
 			type: String,
 			enum: ['notCreated', 'pending', 'payed', 'confirmed'],
 		},
 		dateForPayment: Date,
-        paymentID: {
-            type: Schema.Types.ObjectId,
-            ref: 'Payment',
-        },
 	},
 	{
 		versionKey: false,
@@ -26,6 +36,7 @@ const invoiceSchema = new Schema(
 	}
 );
 
-const Invoice = model('Invoice', invoiceSchema);
 
-module.exports = Invoice;
+const Concept = model('Concept', conceptSchema);
+
+module.exports = Concept;

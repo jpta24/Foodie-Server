@@ -8,6 +8,7 @@ const User = require('../models/User.model');
 const Order = require('../models/Order.model');
 
 const mail = require('../data/mails');
+const Invoice = require('../models/Invoice.model');
 
 router.get('/:userID', (req, res, next) => {
 	User.findById(req.params.userID)
@@ -222,7 +223,37 @@ router.put('/order/:userID', (req, res, next) => {
 					$push: { orders: orderID },
 				});
 			})
-			.then(async () => {
+			.then(async (business) => {
+				const businessComisionInvoice = business.invoices.filter((invoice) => {
+					return (
+						(invoice.status === 'notCreated' || invoice.status === 'pending') &&
+						invoice.code === 'comision'
+					);
+				});
+
+				if (businessComisionInvoice.length > 0) {
+					const activeMembership = business.membership.filter((membership) => membership.status === 'active')[0];
+
+					const isComisionable =
+						createdOrder.paymentMethod !== 'card' &&
+						createdOrder.paymentMethod !== 'pp';
+
+					if (isComisionable) {
+						businessComisionInvoice[0].price +=
+							createdOrder.summary * (activeMembership.plan.comision / 100);
+						businessComisionInvoice[0].orders.notPayed.push(createdOrder._id);
+						//verificar invoice stauts y cambiarlo
+						if (businessComisionInvoice[0].status === 'notCreated') {
+							businessComisionInvoice[0].status ='pending'
+						}
+					} else {
+						businessComisionInvoice[0].orders.payed.push(createdOrder._id);
+					}
+					businessComisionInvoice[0].save();
+				} else {
+					console.log('No Invoices with these Criteria.');
+				}
+
 				const thisOrder = userUpdated.orders[userUpdated.orders.length - 1];
 				const ordNum = thisOrder._id + '';
 				const orders = thisOrder.products

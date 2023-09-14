@@ -2,104 +2,126 @@ const router = require('express').Router();
 
 const sendMail = require('../config/nodemailer.config');
 
-const { newBusiness,accountInactiveInvoicePayment,notificationNewInvoice } = require('../data/mails');
-const membershipsData = require('../data/memberships.json');
-
+const {
+	newBusiness,
+	accountInactiveInvoicePayment,
+	notificationNewInvoice,
+} = require('../data/mails');
 
 const Business = require('../models/Bussiness.model');
 const User = require('../models/User.model');
 const Invoice = require('../models/Invoice.model');
+const Concept = require('../models/Concept.model');
 
 const { isAuthenticated } = require('../middleware/jwt.middleware');
 
 // Función principal que se ejecutará una vez al día
-const checkMembership = async () =>{
-// async function verificarMembresias() {
+const checkMembership = async () => {
+	// async function verificarMembresias() {
 	const currentDate = new Date();
 
-	const businesses = await Business.find().populate('invoices').select('invoices name membership isActive address');
+	const businesses = await Business.find()
+		.populate('invoices concepts')
+		.select('invoices concepts name membership isActive address');
 
 	businesses.forEach(async (business) => {
+		const months = [
+			'Jan',
+			'Feb',
+			'Mar',
+			'Apr',
+			'May',
+			'Jun',
+			'Jul',
+			'Aug',
+			'Sep',
+			'Nov',
+			'Dic',
+		];
+		const activeMembership = business.membership.filter((membership) => membership.status === 'active')[0]
 		
-			////////////////////////////// VERIFICACION SI YA PASO FECHA DE PAGO
-			if (
-				business.membership.reverse()[0].dateNextPayment < currentDate &&
-				business.isActive 
-				// && false
-			) {
-				business.isActive = false
-				await business.save()
-	
-				const invoicePending = business.invoices.filter((invoice) => invoice.status === 'pending').reverse()[0]
-					// Send email 
-				const mailOptions = {
-					from: 'FOODYS APP <info@foodys.app>',
-					to: business.address.email,
-					subject: 'Foodys Account Status Update',
-					html: accountInactiveInvoicePayment(business,invoicePending),
-				};
-	
-				await sendMail(mailOptions);
-			}
+		const plan = activeMembership.plan;
+		const month =
+			months[activeMembership.dateNextPayment.getMonth()];
+		////////////////////////////// VERIFICACION SI YA PASO FECHA DE PAGO
+		if (
+			activeMembership.dateNextPayment < currentDate &&
+			business.isActive
+			// && false
+		) {
+			business.isActive = false;
+			await business.save();
+
+			const invoicePending = business.invoices
+				.filter((invoice) => invoice.status === 'pending')
+				.reverse()[0];
+			// Send email
+			const mailOptions = {
+				from: 'FOODYS APP <info@foodys.app>',
+				to: business.address.email,
+				subject: 'Foodys Account Status Update',
+				html: accountInactiveInvoicePayment(business, invoicePending),
+			};
+
+			await sendMail(mailOptions);
+		}
 
 		////////////////////////////// VERIFICACION ESTA A MENOS DE 5 DIAS, NO NOTIFICADO, ACTIVO
 		const remainDays = Math.floor(
-			(business.membership.reverse()[0].dateNextPayment - currentDate) / (1000 * 60 * 60 * 24)
+			(activeMembership.dateNextPayment - currentDate) /
+				(1000 * 60 * 60 * 24)
 		);
 
-		if (remainDays <= 5 && !business.membership.reverse()[0].invoiceNotified) {
+		if (remainDays <= 5 && !business.invoiceNotified) {
+			// REVISAR Y ADAPTAR LAS MODIFICACIONES DEL INVIOICE
 			const newInvoice = {
 				business: business._id,
-				charge: [
-					{
-						concept: `Membership`,
-						description: `Monthly Membership Fee for your ${plan.name} Plan for ${month}`,
-						price: `${plan.price['usd']}`,
-					},
-				],
+				concept: `Membership`,
+				description: `Monthly Membership Fee for your ${plan.name} Plan for ${month}`,
+				price: `${plan.price['usd']}`,
 				status: 'pending',
-				dateForPayment:business.membership.reverse()[0].dateNextPayment
-			}; 
+				dateForPayment: activeMembership.dateNextPayment,
+			};
 
-			const newInvoiceCreated = await Invoice.create(newInvoice)
+			const newInvoiceCreated = await Invoice.create(newInvoice);
 
-			business.membership[business.membership.length - 1].invoiceNotified = true
+			business.invoiceNotified = true;
 
 			business.invoices.push(newInvoiceCreated);
 
 			await business.save();
 
-			// Send email 
+			// Send email
 			const mailOptions = {
 				from: 'FOODYS APP <info@foodys.app>',
 				to: business.address.email,
 				subject: 'New Foodys Invoice Generated - Action Required',
-				html: notificationNewInvoice(business,newInvoiceCreated),
+				html: notificationNewInvoice(business, newInvoiceCreated),
 			};
 
 			await sendMail(mailOptions);
 		}
 	});
-}
-const checking = () =>{
+};
+const checking = () => {
 	const currentDate = new Date();
 	const nextCheck = new Date();
-		nextCheck.setHours(9, 0, 0, 0);
-	
-		let diff = nextCheck - currentDate;
-	
+	nextCheck.setHours(9, 0, 0, 0);
+
+	let diff = nextCheck - currentDate;
+
 	if (diff < 0) {
-	  nextCheck.setDate(nextCheck.getDate() + 1); 
-	  diff = nextCheck - currentDate;
+		nextCheck.setDate(nextCheck.getDate() + 1);
+		diff = nextCheck - currentDate;
 	}
 
 	setTimeout(() => {
-		console.log(`Checking Memberships Activated at: ${new Date}`)
-		setInterval(checkMembership, 24 * 60 * 60 * 1000)
-	  }, diff);
-}
+		console.log(`Checking Memberships Activated at: ${new Date()}`);
+		setInterval(checkMembership, 24 * 60 * 60 * 1000);
+	}, diff);
+};
 
-checking()
+checking();
 
 router.post('/', isAuthenticated, async (req, res, next) => {
 	const { buz } = req.body;
@@ -170,12 +192,47 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 		res.status(400).json({ message: 'Provide a correct Name and Address ' });
 		return;
 	}
-	const membership = {
-		plan: preMembership.plan,
-		usedTrial: preMembership === 'trial' ? true : false,
-		updated: new Date(),
-	};
-	// console.log({ membership });
+	// const membership = {
+	// 	plan: preMembership.plan,
+	// 	usedTrial: preMembership === 'trial' ? true : false,
+	// 	updated: new Date(),
+	// };
+	const date = new Date();
+	const dateNextPayment = date.setMonth(date.getMonth() + 1);
+	const {
+		name: memName,
+		price,
+		comision,
+		maxProducts,
+		maxHighlighted,
+		monthlySales,
+		ads,
+		payment,
+	} = preMembership;
+	const membership = [
+		{
+			plan: {
+				name: memName,
+				price,
+				comision,
+				maxProducts,
+				maxHighlighted,
+				monthlySales,
+				ads,
+				payment,
+			},
+			usedTrial: memName === 'trial' ? true : false,
+			updated: new Date(),
+			dateStart: new Date(),
+			dateNextPayment: dateNextPayment,
+			price: preMembership.price[
+					currency === '€' || 'euro' || 'EUR' || 'eur' ? 'eur' : 'usd'
+				],
+			currency: currency === '€' || 'euro' || 'EUR' || 'eur' ? 'eur' : 'usd',
+			status: 'notNotified',
+		},
+	];
+
 	const newBuz = {
 		name,
 		address,
@@ -185,6 +242,7 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 		owner,
 		currency,
 		membership,
+		invoiceNotified: false,
 	};
 	Business.findOne({ name })
 		.then((foundBusiness) => {
@@ -195,7 +253,58 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 
 			return Business.create(newBuz);
 		})
-		.then((business) => {
+		.then(async (business) => {
+			const months = [
+				'Jan',
+				'Feb',
+				'Mar',
+				'Apr',
+				'May',
+				'Jun',
+				'Jul',
+				'Aug',
+				'Sep',
+				'Nov',
+				'Dic',
+			];
+			
+			const month =
+				months[business.membership[0].dateNextPayment.getMonth()];
+
+			if (business.membership[0].plan.name!=='Free'||'Demo') {
+							
+			const newInvoiceMembership = {
+				business: business._id,
+				code:'membership',
+				concept: `Membership`,
+				description: `Monthly Membership Fee for your ${business.membership[0].plan.name} Plan for ${month}`,
+				price: `${business.membership[0].price[business.membership[0].currency]}`,
+				status: 'notCreated',
+				dateForPayment: business.membership[0].dateNextPayment,
+			};
+
+			const newInvoiceMembershipCreated = await Invoice.create(newInvoiceMembership);
+
+			business.invoices.push(newInvoiceMembershipCreated);
+
+			await business.save();
+		}
+		const newInvoiceComision = {
+			business: business._id,
+			code:'comision',
+			concept: `Sales Comision`,
+			description: `Monthly Sales Comision Fees for ${month}`,
+			orders:{payed:[],notPayed:[]},
+			price: 0,
+			status: 'notCreated',
+			dateForPayment: business.membership[0].dateNextPayment,
+		};
+
+		const newInvoiceComisionCreated = await Invoice.create(newInvoiceComision);
+
+		business.invoices.push(newInvoiceComisionCreated);
+
+		await business.save();
 			User.findByIdAndUpdate(
 				owner,
 				{ business: business._id, rol: 'admin' },

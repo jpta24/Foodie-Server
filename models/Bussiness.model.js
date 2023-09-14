@@ -11,10 +11,10 @@ const businessSchema = new Schema(
 			telephone: String,
 			email: String,
 		},
-		ssmm:{
-			fb:String,
-			ig:String,
-			wa:String
+		ssmm: {
+			fb: String,
+			ig: String,
+			wa: String,
 		},
 		format: {
 			delivery: {
@@ -50,7 +50,7 @@ const businessSchema = new Schema(
 			packed: Boolean,
 			frozen: Boolean,
 		},
-		description:String,
+		description: String,
 		logoUrl: String,
 		bgUrl: String,
 		owner: {
@@ -67,27 +67,41 @@ const businessSchema = new Schema(
 			{
 				type: Schema.Types.ObjectId,
 				ref: 'Product',
-				default: []
+				default: [],
 			},
 		],
 		pdfMenuUrl: String,
-		membership: [{
-			plan: {
-				type: String,
-				enum: ['trial', 'free', 'basic', 'premium','menu','web','demo'],
+		membership: [
+			{
+				plan: {
+					name: {
+						type: String,
+						enum: ['trial', 'free', 'basic', 'premium', 'menu', 'web', 'demo'],
+					},
+					price: {
+						usd: Number,
+						eur: Number,
+					},
+					comision: Number,
+					maxProducts: Number,
+					maxHighlighted: Number,
+					monthlySales: Number,
+					ads: false,
+					payment: [String],
+				},
+				usedTrial: Boolean,
+				updated: Date,
+				dateStart: Date,
+				dateNextPayment: Date,
+				price: Number,
+				currency: String,
+				dateChanged:Date,
+				status: {
+					type: String,
+					enum: ['active', 'nextMonth','changed'],
+				},
 			},
-			usedTrial: Boolean,
-			updated: Date,
-			dateStart:Date,
-			dateNextPayment:Date,
-			price:Number,
-			currency:String,
-			invoiceNotified:Boolean,
-			status: {
-				type: String,
-				enum: ['auto','notCreated','pending', 'payed','confirmed'],
-			},
-		}],
+		],
 		isActive: Boolean,
 		currency: String,
 		orders: [
@@ -103,10 +117,26 @@ const businessSchema = new Schema(
 			},
 		],
 		timesSaved: Number,
-		invoices:[{
-			type: Schema.Types.ObjectId,
-			ref:'Invoice'
-		}]
+		invoices: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Invoice',
+			},
+		],
+		concepts: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Concept',
+			},
+		],
+		payments: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'Payment',
+			},
+		],
+		
+		invoiceNotified: Boolean,
 	},
 	{
 		versionKey: false,
