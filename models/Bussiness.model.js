@@ -89,7 +89,6 @@ const businessSchema = new Schema(
 					ads: false,
 					payment: [String],
 				},
-				usedTrial: Boolean,
 				updated: Date,
 				dateStart: Date,
 				dateNextPayment: Date,
@@ -102,6 +101,7 @@ const businessSchema = new Schema(
 				},
 			},
 		],
+		usedTrial: Boolean,
 		isActive: Boolean,
 		currency: String,
 		orders: [

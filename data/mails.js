@@ -486,8 +486,7 @@ function infoNewUser(nombre,correo) {
 	return mailText;
 }
 
-function accountInactiveInvoicePayment(business,invoice) {
-    const invoiceNumber = (invoice._id+'').slice(10).toUpperCase()
+function accountInactiveInvoicePayment(business) {
 	const mailText = `
         <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
             <div>
@@ -504,11 +503,11 @@ function accountInactiveInvoicePayment(business,invoice) {
                         <div>
                             <div>
                                 <hr/>
-                                <h3>We would like to inform you that your account with us is currently marked as inactive due to an outstanding invoice (Invoice Number: ${invoiceNumber}) that has not been paid.</h3>
+                                <h3>We would like to inform you that your account with us is currently marked as inactive due to an outstanding invoice that has not been paid.</h3>
                                 <p>To reactivate your account and continue enjoying our services, please click on the following link to make the payment and bring your account up to date:</p>
                                 <br/>
                                 <div>
-                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/invoice/${invoice._id}', '_blank')'>Make Payment</button>
+                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/pending-invoice, '_blank')'>Make Payment</button>
                                 </div>
                                 <hr/>                                
                                 <p>Please note that your access to certain features and benefits may be restricted until the payment is successfully processed.</p>
@@ -527,15 +526,18 @@ function accountInactiveInvoicePayment(business,invoice) {
 	return mailText;
 }
 
-function notificationNewInvoice(business,invoice) {
-    const invoiceNumber = (invoice._id+'').slice(10).toUpperCase()
-    const amount = invoice.charge.map(elem =>elem.price).reduce((acc, val) => {
+function notificationNewInvoice(business) {
+    const amount = business.concepts.filter(concept=>concept.status==='pending').map(concept=>concept.price).reduce((acc, val) => {
         return acc + val;
     })
     .toFixed(2);
+    const activeMembership = business.membership.filter(
+        (membership) => membership.status === 'active'
+    )[0];
+    const datePayment = activeMembership.dateNextPayment
     function formatDateToDDMMYYYY(date) {
         const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+        const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
       
         return `${day}/${month}/${year}`;
@@ -557,18 +559,17 @@ function notificationNewInvoice(business,invoice) {
                         <div>
                             <div>
                                 <hr/>
-                                <h3>We would like to inform you that a new invoice (Invoice Number: ${invoiceNumber}) has been generated for your account.</h3>
-                                <p>This invoice must be paid by the due date (${formatDateToDDMMYYYY(invoice.dateForPayment)})  to avoid any delays or disruptions to your business.</p>
+                                <h3>We would like to inform you that a new invoice due Membership and/or Sales Comisions, has been generated for your account.</h3>
+                                <p>This invoice must be paid by the due date (${formatDateToDDMMYYYY(datePayment)}) to avoid any delays or disruptions to your business.</p>
                                 <br/>
                                 <p>Invoice Details:</p>
-                                <p>- Invoice Number: ${invoiceNumber} </p>
                                 <p>- Amount Due: ${amount}.</p>
-                                <p>- Due Date: $${formatDateToDDMMYYYY(invoice.dateForPayment)}.</p>
+                                <p>- Due Date: $${formatDateToDDMMYYYY(datePayment)}.</p>
                                 <hr/>                                
                                 <p>To ensure uninterrupted service and prevent any inconveniences, please click on the following link to make the payment:</p>
                                 <br/> 
                                 <div>
-                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/invoice/${invoice._id}', '_blank')'>Make Payment</button>
+                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/${business.name.split(' ').join('-')}/pending-invoice', '_blank')'>Make Payment</button>
                                 </div>
                                 <br/>                                
                                 <p>We kindly request that you complete the payment before the due date mentioned above. If you have any questions or require assistance with the payment process, please do not hesitate to contact our support team at info@foodys.app. We are here to assist you with any concerns you may have.</p>
@@ -581,6 +582,44 @@ function notificationNewInvoice(business,invoice) {
                 </div>
             </div>
         </div>
+    `;
+	return mailText;
+}
+
+function notificationMembershipChanged(business) {
+    const activeMembership = business.membership.filter(
+        (membership) => membership.status === 'active'
+    )[0];
+	const mailText = `
+    <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
+        <div>
+            <div style='padding:10px'>
+                <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
+                    <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
+                    <h1 style='margin-left:15px'>Foodys</h1>
+                </a>
+            </div>
+            <div style='padding:10px'>
+                <h1 style='margin-top:3px'>Hi ${business.name},</h1>
+                <p>We hope this email finds you good.</p>
+                <div>
+                    <div>
+                        <div>
+                            <hr/>
+                            <h3>We are pleased to inform you that your membership with Foodys has been successfully updated to ${activeMembership.plan.name} Plan.</h3>
+                            <p>Your new membership plan is now in effect, providing you with enhanced features and benefits tailored to meet your business needs.</p>
+                            <br/>  
+                            <p>If you have any questions or require assistance regarding your membership or our services, please feel free to reach out to us. We are here to assist you in any way we can.</p>
+                            <hr/>                                
+                            <p>Thank you for being a part of FOODYS APP. We highly value your partnership and eagerly anticipate providing you with a great experience.</p>
+                            <h3>Best regards,</h3>
+                            <h3>Foodys App Team</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     `;
 	return mailText;
 }
@@ -599,5 +638,6 @@ module.exports = {
 	mailStatusBusinessBusiness,
     infoNewUser,
     accountInactiveInvoicePayment,
-    notificationNewInvoice
+    notificationNewInvoice,
+    notificationMembershipChanged
 };

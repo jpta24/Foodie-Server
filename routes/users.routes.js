@@ -8,7 +8,7 @@ const User = require('../models/User.model');
 const Order = require('../models/Order.model');
 
 const mail = require('../data/mails');
-const Invoice = require('../models/Invoice.model');
+const Concept = require('../models/Concept.model');
 
 router.get('/:userID', (req, res, next) => {
 	User.findById(req.params.userID)
@@ -224,14 +224,14 @@ router.put('/order/:userID', (req, res, next) => {
 				});
 			})
 			.then(async (business) => {
-				const businessComisionInvoice = business.invoices.filter((invoice) => {
+				const businessComisionConcepts = business.concepts.filter((concept) => {
 					return (
-						(invoice.status === 'notCreated' || invoice.status === 'pending') &&
-						invoice.code === 'comision'
+						concept.code === 'comision' && (concept.status === 'notCreated' || concept.status === 'pending') 
 					);
 				});
 
-				if (businessComisionInvoice.length > 0) {
+				if (businessComisionConcepts.length > 0) {
+					const businessComisionConcept = businessComisionConcepts[0]
 					const activeMembership = business.membership.filter((membership) => membership.status === 'active')[0];
 
 					const isComisionable =
@@ -239,19 +239,19 @@ router.put('/order/:userID', (req, res, next) => {
 						createdOrder.paymentMethod !== 'pp';
 
 					if (isComisionable) {
-						businessComisionInvoice[0].price +=
+						businessComisionConcept.price +=
 							createdOrder.summary * (activeMembership.plan.comision / 100);
-						businessComisionInvoice[0].orders.notPayed.push(createdOrder._id);
-						//verificar invoice stauts y cambiarlo
-						if (businessComisionInvoice[0].status === 'notCreated') {
-							businessComisionInvoice[0].status ='pending'
+						businessComisionConcept.orders.notPayed.push(createdOrder._id);
+						//verificar concept stauts y cambiarlo
+						if (businessComisionConcept.status === 'notCreated') {
+							businessComisionConcept.status ='pending'
 						}
 					} else {
-						businessComisionInvoice[0].orders.payed.push(createdOrder._id);
+						businessComisionConcept.orders.payed.push(createdOrder._id);
 					}
-					businessComisionInvoice[0].save();
+					businessComisionConcept.save();
 				} else {
-					console.log('No Invoices with these Criteria.');
+					console.log('No Concepts with these Criteria.');
 				}
 
 				const thisOrder = userUpdated.orders[userUpdated.orders.length - 1];

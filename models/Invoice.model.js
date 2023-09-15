@@ -6,15 +6,14 @@ const invoiceSchema = new Schema(
 			type: Schema.Types.ObjectId,
 			ref: 'Business',
 		},
-		concepts:{
+		concepts:[{
 					type: Schema.Types.ObjectId,
 					ref: 'Conpcept',
-				},
+				}],
 		status: {
 			type: String,
 			enum: ['notCreated', 'pending', 'payed', 'confirmed'],
 		},
-		dateForPayment: Date,
         paymentID: {
             type: Schema.Types.ObjectId,
             ref: 'Payment',

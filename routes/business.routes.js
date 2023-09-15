@@ -8,6 +8,12 @@ const {
 	notificationNewInvoice,
 } = require('../data/mails');
 
+const {
+	// checking,
+	createNewComisionsConcept,createNewMembershipConcept,
+	createNewMembership
+} = require('../functions/functions')
+
 const Business = require('../models/Bussiness.model');
 const User = require('../models/User.model');
 const Invoice = require('../models/Invoice.model');
@@ -38,11 +44,12 @@ const checkMembership = async () => {
 			'Nov',
 			'Dic',
 		];
-		const activeMembership = business.membership.filter((membership) => membership.status === 'active')[0]
-		
+		const activeMembership = business.membership.filter(
+			(membership) => membership.status === 'active'
+		)[0];
+
 		const plan = activeMembership.plan;
-		const month =
-			months[activeMembership.dateNextPayment.getMonth()];
+		const month = months[activeMembership.dateNextPayment.getMonth()];
 		////////////////////////////// VERIFICACION SI YA PASO FECHA DE PAGO
 		if (
 			activeMembership.dateNextPayment < currentDate &&
@@ -74,10 +81,13 @@ const checkMembership = async () => {
 
 		if (remainDays <= 5 && !business.invoiceNotified) {
 			// REVISAR Y ADAPTAR LAS MODIFICACIONES DEL INVIOICE
+			const pendingComisionInvoice = business.concepts.filter(
+				(concept) => concept.status.pending
+			);
 			const newInvoice = {
 				business: business._id,
-				concept: `Membership`,
-				description: `Monthly Membership Fee for your ${plan.name} Plan for ${month}`,
+				concept: `Monthly Charges`,
+				description: `Monthly Membership Fee for your ${plan.name} Plan and/or Sales Comision for ${month}`,
 				price: `${plan.price['usd']}`,
 				status: 'pending',
 				dateForPayment: activeMembership.dateNextPayment,
@@ -160,9 +170,9 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 		format.pickup === false &&
 		format.inplace === false
 	) {
-		res
-			.status(400)
-			.json({ message: 'Please select at least one delivery format' });
+		res.status(400).json({
+			message: 'Please select at least one delivery format',
+		});
 		return;
 	}
 
@@ -171,15 +181,15 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 		type.packed === false &&
 		type.frozen === false
 	) {
-		res
-			.status(400)
-			.json({ message: 'Please select at least one Product Type' });
+		res.status(400).json({
+			message: 'Please select at least one Product Type',
+		});
 		return;
 	}
 	if (categories.length === 0) {
-		res
-			.status(400)
-			.json({ message: 'Please select at least one Catalog Category' });
+		res.status(400).json({
+			message: 'Please select at least one Catalog Category',
+		});
 		return;
 	}
 
@@ -189,7 +199,9 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 		address.city === '' ||
 		address.country === ''
 	) {
-		res.status(400).json({ message: 'Provide a correct Name and Address ' });
+		res.status(400).json({
+			message: 'Provide a correct Name and Address ',
+		});
 		return;
 	}
 	// const membership = {
@@ -197,41 +209,45 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 	// 	usedTrial: preMembership === 'trial' ? true : false,
 	// 	updated: new Date(),
 	// };
-	const date = new Date();
-	const dateNextPayment = date.setMonth(date.getMonth() + 1);
-	const {
-		name: memName,
-		price,
-		comision,
-		maxProducts,
-		maxHighlighted,
-		monthlySales,
-		ads,
-		payment,
-	} = preMembership;
-	const membership = [
-		{
-			plan: {
-				name: memName,
-				price,
-				comision,
-				maxProducts,
-				maxHighlighted,
-				monthlySales,
-				ads,
-				payment,
-			},
-			usedTrial: memName === 'trial' ? true : false,
-			updated: new Date(),
-			dateStart: new Date(),
-			dateNextPayment: dateNextPayment,
-			price: preMembership.price[
-					currency === '€' || 'euro' || 'EUR' || 'eur' ? 'eur' : 'usd'
-				],
-			currency: currency === '€' || 'euro' || 'EUR' || 'eur' ? 'eur' : 'usd',
-			status: 'notNotified',
-		},
-	];
+	const membership = [createNewMembership(null, preMembership,currency,'active',false)]
+	if (preMembership==='Trial') {
+		membership.push(createNewMembership(null,'Free',currency,'nextMonth',true))
+	}
+	// const date = new Date();
+	// const dateNextPayment = date.setMonth(date.getMonth() + 1);
+	// const {
+	// 	name: memName,
+	// 	price,
+	// 	comision,
+	// 	maxProducts,
+	// 	maxHighlighted,
+	// 	monthlySales,
+	// 	ads,
+	// 	payment,
+	// } = preMembership;
+	// const membership = [
+	// 	{
+	// 		plan: {
+	// 			name: memName,
+	// 			price,
+	// 			comision,
+	// 			maxProducts,
+	// 			maxHighlighted,
+	// 			monthlySales,
+	// 			ads,
+	// 			payment,
+	// 		},
+	// 		updated: new Date(),
+	// 		dateStart: new Date(),
+	// 		dateNextPayment: dateNextPayment,
+	// 		price: preMembership.price[
+	// 			currency === '€' || 'euro' || 'EUR' || 'eur' ? 'eur' : 'usd'
+	// 		],
+	// 		currency:
+	// 			currency === '€' || 'euro' || 'EUR' || 'eur' ? 'eur' : 'usd',
+	// 		status: 'active',
+	// 	},
+	// ];
 
 	const newBuz = {
 		name,
@@ -242,6 +258,7 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 		owner,
 		currency,
 		membership,
+		usedTrial: preMembership ==='Trial',
 		invoiceNotified: false,
 	};
 	Business.findOne({ name })
@@ -254,57 +271,11 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 			return Business.create(newBuz);
 		})
 		.then(async (business) => {
-			const months = [
-				'Jan',
-				'Feb',
-				'Mar',
-				'Apr',
-				'May',
-				'Jun',
-				'Jul',
-				'Aug',
-				'Sep',
-				'Nov',
-				'Dic',
-			];
-			
-			const month =
-				months[business.membership[0].dateNextPayment.getMonth()];
-
-			if (business.membership[0].plan.name!=='Free'||'Demo') {
-							
-			const newInvoiceMembership = {
-				business: business._id,
-				code:'membership',
-				concept: `Membership`,
-				description: `Monthly Membership Fee for your ${business.membership[0].plan.name} Plan for ${month}`,
-				price: `${business.membership[0].price[business.membership[0].currency]}`,
-				status: 'notCreated',
-				dateForPayment: business.membership[0].dateNextPayment,
-			};
-
-			const newInvoiceMembershipCreated = await Invoice.create(newInvoiceMembership);
-
-			business.invoices.push(newInvoiceMembershipCreated);
+			await createNewComisionsConcept(business)
+			await createNewMembershipConcept(business)
 
 			await business.save();
-		}
-		const newInvoiceComision = {
-			business: business._id,
-			code:'comision',
-			concept: `Sales Comision`,
-			description: `Monthly Sales Comision Fees for ${month}`,
-			orders:{payed:[],notPayed:[]},
-			price: 0,
-			status: 'notCreated',
-			dateForPayment: business.membership[0].dateNextPayment,
-		};
 
-		const newInvoiceComisionCreated = await Invoice.create(newInvoiceComision);
-
-		business.invoices.push(newInvoiceComisionCreated);
-
-		await business.save();
 			User.findByIdAndUpdate(
 				owner,
 				{ business: business._id, rol: 'admin' },
@@ -315,7 +286,8 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 					const mailOptions = {
 						from: 'FOODYS APP <info@foodys.app>',
 						to: address.email,
-						subject: 'You successfully created a Foodys Business account!',
+						subject:
+							'You successfully created a Foodys Business account!',
 						bcc: 'info@foodys.app',
 						html: newBusiness(userUpdated, name),
 					};
@@ -326,15 +298,16 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 				})
 				.catch((err) => {
 					console.log(err);
-					res
-						.status(500)
-						.json({ message: 'Could not Update the user Business' });
+					res.status(500).json({
+						message: 'Could not Update the user Business',
+					});
 				});
 		})
 		.catch((err) => {
 			console.log(err);
 			res.status(500).json({
-				message: 'Could not create the Business, check data and try again',
+				message:
+					'Could not create the Business, check data and try again',
 			});
 		});
 });
@@ -385,7 +358,8 @@ router.put('/edit/:businessNameEncoded', isAuthenticated, (req, res, next) => {
 	const { part, buz } = req.body;
 	let editBuz;
 	if (part === 1) {
-		const { name, address, categories, type, format, owner, currency } = buz;
+		const { name, address, categories, type, format, owner, currency } =
+			buz;
 		editBuz = { name, address, categories, type, format, owner, currency };
 	} else if (part === 2) {
 		const { logoUrl, ssmm, description, bgUrl, pdfMenu, payment } = buz;
@@ -440,7 +414,8 @@ router.put(
 
 		const { selectedPlan, usedTrial } = req.body;
 
-		const newTrialStatus = usedTrial || selectedPlan === 'trial' ? true : false;
+		const newTrialStatus =
+			usedTrial || selectedPlan === 'trial' ? true : false;
 
 		const membership = {
 			plan: selectedPlan,
@@ -448,13 +423,19 @@ router.put(
 			usedTrial: newTrialStatus,
 		};
 
-		Business.findOneAndUpdate({ name: buzName }, { membership }, { new: true })
+		Business.findOneAndUpdate(
+			{ name: buzName },
+			{ membership },
+			{ new: true }
+		)
 			.then((business) => {
 				res.status(200).json(business);
 			})
 			.catch((err) => {
 				console.log(err);
-				res.status(500).json({ message: 'Sorry internal error occurred' });
+				res.status(500).json({
+					message: 'Sorry internal error occurred',
+				});
 			});
 	}
 );
@@ -498,7 +479,9 @@ router.put(
 								},
 							},
 						});
-				} else if (businessFound.highlightedProducts.includes(productID)) {
+				} else if (
+					businessFound.highlightedProducts.includes(productID)
+				) {
 					return Business.findByIdAndUpdate(
 						businessID,
 						{ $pull: { highlightedProducts: productID } },
@@ -565,7 +548,9 @@ router.put(
 			})
 			.catch((err) => {
 				console.log(err);
-				res.status(500).json({ message: 'Sorry internal error occurred' });
+				res.status(500).json({
+					message: 'Sorry internal error occurred',
+				});
 			});
 	}
 );
@@ -617,8 +602,7 @@ router.get('/dashboard/:businessNameEncoded', (req, res, next) => {
 	Business.findOne({ name })
 		.populate({
 			path: 'orders',
-			select:
-				'products business status summary paymentMethod format user note createdAt',
+			select: 'products business status summary paymentMethod format user note createdAt',
 			populate: [
 				{
 					path: 'products',
