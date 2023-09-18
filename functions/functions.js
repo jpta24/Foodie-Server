@@ -83,6 +83,8 @@ const checkBusinesses = async () => {
 				});
 
 				business.invoiceNotified = true;
+				
+				await business.save();
 
 				// Send email
 				const mailOptions = {
@@ -96,18 +98,21 @@ const checkBusinesses = async () => {
 			}
 		}
 		//* VERIFY MEMBERSHIP CHANGES
-		if (activeMembership.dateNextPayment < currentDate && changeMembership.length > 0) {
+		if (activeMembership.dateNextPayment < currentDate && changeMembership) {
 			activeMembership.status = 'changed'
 			activeMembership.dateChanged = new Date
 
 			changeMembership.status = 'active'
 			changeMembership.dateStart = new Date
+			applyMembershipChanges(business,changeMembership.plan.name.toLocaleLowerCase())
+			
+			await business.save();
 
 			// Send email
 			const mailOptions = {
 				from: 'FOODYS APP <info@foodys.app>',
 				to: business.address.email,
-				subject: 'Foodys Membership Update',
+				subject: 'Foodys Membership Updated',
 				html: notificationMembershipChanged(business),
 			};
 
@@ -134,9 +139,13 @@ const checkBusinesses = async () => {
 				business.membership.dateForPayment = nextPaymentDate;
 				await createNewComisionsConcept(business);
 				await createNewMembershipConcept(business);
+				
+				await business.save();
 
 			} else {
 				business.isActive = false;
+				
+				await business.save();
 
 				// Send email
 				const mailOptions = {
@@ -150,8 +159,6 @@ const checkBusinesses = async () => {
 				await sendMail(mailOptions);
 			}
 		}
-
-		await business.save();
 		
 	});
 };
@@ -237,6 +244,22 @@ const createNewMembership =(business,plan,currency,status,nextMem)=>{
 			currency === '€' || currency ==='euro' || currency ==='EUR' || currency ==='eur' ? 'eur' : 'usd',
 		status: status,
 	}
+}
+
+const applyMembershipChanges =(business,plan)=>{
+	const newPlan = membershipData[plan]
+	if (business.products.length > newPlan.maxProducts) {
+		business.products.forEach((product,i) =>{
+			if (i>newPlan.maxProducts-1&&product.status==='active') {
+				product.status='paused'
+				product.save()
+			}
+		})
+	}
+	if (business.highlightedProducts.length > newPlan.maxHighlighted) {
+		business.highlightedProducts = business.highlightedProducts.slice(0,newPlan.maxProducts)
+	}
+	business.save()
 }
 
 module.exports = {
