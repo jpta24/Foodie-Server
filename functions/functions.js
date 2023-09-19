@@ -2,7 +2,6 @@ const sendMail = require('../config/nodemailer.config');
 const membershipData = require('../data/memberships.json')
 
 const {
-	newBusiness,
 	accountInactiveInvoicePayment,
 	notificationNewInvoice,
 	notificationMembershipChanged
@@ -23,6 +22,7 @@ const months = [
 	'Jul',
 	'Aug',
 	'Sep',
+	'Oct',
 	'Nov',
 	'Dic',
 ];
@@ -39,7 +39,7 @@ const checking = () => {
 	}
 
 	setTimeout(() => {
-		console.log(`Checking Memberships Activated at: ${new Date()}`);
+		console.log(`Checking Businesses Activated at: ${new Date()}`);
 		setInterval(checkBusinesses, 24 * 60 * 60 * 1000);
 	}, diff);
 };
@@ -55,6 +55,8 @@ const checkBusinesses = async () => {
 		)[0];
 
 		const isTrial = activeMembership.plan.name ==='Trial'
+		const isNextPlan = business.membership.find(membership=>membership.status==='nextMonth') ? true:false
+		const nextPlan = isNextPlan ? business.membership.find(membership=>membership.status==='nextMonth') : null
 
 		const changeMembership = business.membership.filter(membership=>membership.status==='nextMonth')[0]
 
@@ -76,9 +78,28 @@ const checkBusinesses = async () => {
 		);
 
 		if (remainDays <= 5 && !business.invoiceNotified) {
+			if (isTrial && !isNextPlan) {
+				const newMembership= createNewMembership(business,'free',business.currency)
+				business.concepts = business.concepts.filter(concept=>concept.code!=='membership' || concept.status !=='notCreated')
+				business.membership.push(newMembership)
+				await createNewMembershipConcept(business,newMembership)
+				
+				await business.save();
+				// Send email
+				const mailOptions = {
+					from: 'FOODYS APP <info@foodys.app>',
+					to: business.address.email,
+					subject: 'Your Foodys Free Trial is about to Expire',
+					html: notificationNewInvoice(business),
+				};
+
+				await sendMail(mailOptions);
+			}
+
 			if (mustPay) {
 				pendingConcepts.forEach(async (concept) => {
 					concept.status = 'pending';
+					
 					await concept.save();
 				});
 
@@ -96,29 +117,8 @@ const checkBusinesses = async () => {
 
 				await sendMail(mailOptions);
 			}
-		}
-		//* VERIFY MEMBERSHIP CHANGES
-		if (activeMembership.dateNextPayment < currentDate && changeMembership) {
-			activeMembership.status = 'changed'
-			activeMembership.dateChanged = new Date
-
-			changeMembership.status = 'active'
-			changeMembership.dateStart = new Date
-			applyMembershipChanges(business,changeMembership.plan.name.toLocaleLowerCase())
 			
-			await business.save();
-
-			// Send email
-			const mailOptions = {
-				from: 'FOODYS APP <info@foodys.app>',
-				to: business.address.email,
-				subject: 'Foodys Membership Updated',
-				html: notificationMembershipChanged(business),
-			};
-
-			await sendMail(mailOptions);
 		}
-
 
 		//* VERIFY PASS PAYMENT DATE
 		if (
@@ -138,7 +138,8 @@ const checkBusinesses = async () => {
 
 				business.membership.dateForPayment = nextPaymentDate;
 				await createNewComisionsConcept(business);
-				await createNewMembershipConcept(business);
+				await createNewMembershipConcept(business,isNextPlan?nextPlan:activeMembership);
+				business.invoiceNotified=false
 				
 				await business.save();
 
@@ -159,28 +160,54 @@ const checkBusinesses = async () => {
 				await sendMail(mailOptions);
 			}
 		}
+
+		//* VERIFY MEMBERSHIP CHANGES
+		const isDue = business.concepts.filter((concept) => concept.status === 'pending' 
+		).length === 0;
+		if (activeMembership.dateNextPayment < currentDate && changeMembership&&isDue) {
+			activeMembership.status = 'changed'
+			activeMembership.dateChanged = new Date
+
+			changeMembership.status = 'active'
+			changeMembership.dateStart = new Date
+			const nextPaymentDate = new Date(
+				activeMembership.dateNextPayment
+			);
+			nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
+			changeMembership.dateNextPayment = nextPaymentDate
+			applyMembershipChanges(business,changeMembership.plan.name.toLocaleLowerCase())
+			
+			await business.save();
+
+			// Send email
+			const mailOptions = {
+				from: 'FOODYS APP <info@foodys.app>',
+				to: business.address.email,
+				subject: 'Foodys Membership Updated',
+				html: notificationMembershipChanged(business),
+			};
+
+			await sendMail(mailOptions);
+		}
+
+
+		
 		
 	});
 };
 
-const createNewMembershipConcept = async (business) => {
-	const activeMembership = business.membership.filter(
-		(membership) => membership.status === 'active'
-	)[0];
-	const nextMonth =
-		months[
-			activeMembership.dateNextPayment.getMonth() === 11
-				? 0
-				: activeMembership.dateNextPayment.getMonth() + 1
-		];
+const createNewMembershipConcept = async (business,membership,isNextMonth) => {
+	
+	const nextMonth =months[
+                membership.dateNextPayment.getMonth()];
 	const newConceptMembership = {
 		business: business._id,
 		code: 'membership',
 		concept: `Membership`,
-		description: `Monthly Membership Fee for your ${activeMembership.plan.name} Plan for ${nextMonth}`,
-		price: `${activeMembership.price[activeMembership.currency]}`,
+		description: `Monthly Membership Fee for your ${membership.plan.name} Plan for ${nextMonth}`,
+		price: `${membership.price}`,
 		status: 'notCreated',
-		dateForPayment: business.membership[0].dateNextPayment,
+		dateForPayment: membership.dateNextPayment,
 	};
 
 	const newConceptMembershipCreated = await Concept.create(
@@ -191,16 +218,18 @@ const createNewMembershipConcept = async (business) => {
 };
 
 const createNewComisionsConcept = async (business) => {
-	const activeMembership = business.membership.filter(
-		(membership) => membership.status === 'active'
-	)[0];
+	const prevMonth = months[
+        activeMembership.dateNextPayment.getMonth() === 0
+            ? 11
+            : activeMembership.dateNextPayment.getMonth() - 1
+    ];
 	const month = months[activeMembership.dateNextPayment.getMonth()];
 
 	const newConceptComision = {
 		business: business._id,
 		code: 'comision',
 		concept: `Sales Comision`,
-		description: `Monthly Sales Comision Fees for ${month}`,
+		description: `Monthly Sales Comision Fees for ${prevMonth} - ${month}`,
 		orders: { payed: [], notPayed: [] },
 		price: 0,
 		status: 'notCreated',
@@ -212,17 +241,19 @@ const createNewComisionsConcept = async (business) => {
 	business.concepts.push(newConceptComisionCreated);
 };
 
-const createNewMembership =(business,plan,currency,status,nextMem)=>{
+const createNewMembership =(business,plan,currency)=>{
+	if (business && plan=='trial') {
+        business.usedTrial = true
+    }
 	const activeMembership = business ? business.membership.filter(
 		(membership) => membership.status === 'active'
 	)[0]:null;
-	const date = new Date();
+	const applyNow = !business || activeMembership.plan.rank > membershipData[0][plan].rank
 
-    const startDate = new Date()
-	const dateStart = new Date(startDate.setMonth(startDate.getMonth() + (nextMem?1:0)));
-    
+	const date = new Date();
     const nextDate = new Date()
-	const dateNextPayment = new Date(nextDate.setMonth(nextDate.getMonth() + (activeMembership || nextMem ?2:1)));
+	const dateNextPayment = new Date(nextDate.setMonth(nextDate.getMonth() + 1)); 
+	
 	return {
 		plan: {
 			name: membershipData[0][plan].name,
@@ -233,16 +264,20 @@ const createNewMembership =(business,plan,currency,status,nextMem)=>{
 			monthlySales:membershipData[0][plan].monthlySales,
 			ads:membershipData[0][plan].ads,
 			payment:membershipData[0][plan].payment,
+			rank:membershipData[0][plan].rank
 		},
 		updated: date,
-		dateStart:  dateStart,
-		dateNextPayment: dateNextPayment,
+		dateStart:  applyNow?date:null,
+		dateNextPayment: !business
+		? dateNextPayment
+		: activeMembership.dateNextPayment,
+
 		price: membershipData[0][plan].price[
 			currency === '€' || currency ==='euro' || currency ==='EUR' || currency ==='eur' ? 'eur' : 'usd'
 		],
 		currency:
 			currency === '€' || currency ==='euro' || currency ==='EUR' || currency ==='eur' ? 'eur' : 'usd',
-		status: status,
+		status: applyNow?'active':'nextMonth',
 	}
 }
 

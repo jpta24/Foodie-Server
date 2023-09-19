@@ -28,7 +28,14 @@ const paymentSchema = new Schema(
 		},
 		summary: Number,
         paymentImg:String,
+		paymentConfirmationMethed:{
+			type:String,
+			enum:['time','user']
+		},
         paymentConfirmationDate: Date,
+		refID:String,
+		emailUsed:String,
+		phoneUsed:String || Number,
         details: {
 			paymentImg: String,
 			pp: {

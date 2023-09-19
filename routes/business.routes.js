@@ -1,135 +1,28 @@
 const router = require('express').Router();
+const membershipData = require('../data/memberships.json');
 
 const sendMail = require('../config/nodemailer.config');
 
 const {
 	newBusiness,
-	accountInactiveInvoicePayment,
-	notificationNewInvoice,
+	notificationMembershipWillChange,
+	notificationMembershipChanged,notificationPaymentReceived
 } = require('../data/mails');
 
 const {
-	// checking,
-	createNewComisionsConcept,createNewMembershipConcept,
-	createNewMembership
-} = require('../functions/functions')
+	checking,
+	createNewComisionsConcept,
+	createNewMembershipConcept,
+	createNewMembership,
+} = require('../functions/functions');
 
 const Business = require('../models/Bussiness.model');
 const User = require('../models/User.model');
 const Invoice = require('../models/Invoice.model');
 const Concept = require('../models/Concept.model');
+const Payment = require('../models/Payment.model');
 
 const { isAuthenticated } = require('../middleware/jwt.middleware');
-
-// Función principal que se ejecutará una vez al día
-const checkMembership = async () => {
-	// async function verificarMembresias() {
-	const currentDate = new Date();
-
-	const businesses = await Business.find()
-		.populate('invoices concepts')
-		.select('invoices concepts name membership isActive address');
-
-	businesses.forEach(async (business) => {
-		const months = [
-			'Jan',
-			'Feb',
-			'Mar',
-			'Apr',
-			'May',
-			'Jun',
-			'Jul',
-			'Aug',
-			'Sep',
-			'Nov',
-			'Dic',
-		];
-		const activeMembership = business.membership.filter(
-			(membership) => membership.status === 'active'
-		)[0];
-
-		const plan = activeMembership.plan;
-		const month = months[activeMembership.dateNextPayment.getMonth()];
-		////////////////////////////// VERIFICACION SI YA PASO FECHA DE PAGO
-		if (
-			activeMembership.dateNextPayment < currentDate &&
-			business.isActive
-			// && false
-		) {
-			business.isActive = false;
-			await business.save();
-
-			const invoicePending = business.invoices
-				.filter((invoice) => invoice.status === 'pending')
-				.reverse()[0];
-			// Send email
-			const mailOptions = {
-				from: 'FOODYS APP <info@foodys.app>',
-				to: business.address.email,
-				subject: 'Foodys Account Status Update',
-				html: accountInactiveInvoicePayment(business, invoicePending),
-			};
-
-			await sendMail(mailOptions);
-		}
-
-		////////////////////////////// VERIFICACION ESTA A MENOS DE 5 DIAS, NO NOTIFICADO, ACTIVO
-		const remainDays = Math.floor(
-			(activeMembership.dateNextPayment - currentDate) /
-				(1000 * 60 * 60 * 24)
-		);
-
-		if (remainDays <= 5 && !business.invoiceNotified) {
-			// REVISAR Y ADAPTAR LAS MODIFICACIONES DEL INVIOICE
-			const pendingComisionInvoice = business.concepts.filter(
-				(concept) => concept.status.pending
-			);
-			const newInvoice = {
-				business: business._id,
-				concept: `Monthly Charges`,
-				description: `Monthly Membership Fee for your ${plan.name} Plan and/or Sales Comision for ${month}`,
-				price: `${plan.price['usd']}`,
-				status: 'pending',
-				dateForPayment: activeMembership.dateNextPayment,
-			};
-
-			const newInvoiceCreated = await Invoice.create(newInvoice);
-
-			business.invoiceNotified = true;
-
-			business.invoices.push(newInvoiceCreated);
-
-			await business.save();
-
-			// Send email
-			const mailOptions = {
-				from: 'FOODYS APP <info@foodys.app>',
-				to: business.address.email,
-				subject: 'New Foodys Invoice Generated - Action Required',
-				html: notificationNewInvoice(business, newInvoiceCreated),
-			};
-
-			await sendMail(mailOptions);
-		}
-	});
-};
-const checking = () => {
-	const currentDate = new Date();
-	const nextCheck = new Date();
-	nextCheck.setHours(9, 0, 0, 0);
-
-	let diff = nextCheck - currentDate;
-
-	if (diff < 0) {
-		nextCheck.setDate(nextCheck.getDate() + 1);
-		diff = nextCheck - currentDate;
-	}
-
-	setTimeout(() => {
-		console.log(`Checking Memberships Activated at: ${new Date()}`);
-		setInterval(checkMembership, 24 * 60 * 60 * 1000);
-	}, diff);
-};
 
 checking();
 
@@ -209,10 +102,8 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 	// 	usedTrial: preMembership === 'trial' ? true : false,
 	// 	updated: new Date(),
 	// };
-	const membership = [createNewMembership(null, preMembership,currency,'active',false)]
-	if (preMembership==='Trial') {
-		membership.push(createNewMembership(null,'Free',currency,'nextMonth',true))
-	}
+	const membership = [createNewMembership(null, preMembership, currency)];
+
 	// const date = new Date();
 	// const dateNextPayment = date.setMonth(date.getMonth() + 1);
 	// const {
@@ -258,7 +149,7 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 		owner,
 		currency,
 		membership,
-		usedTrial: preMembership ==='Trial',
+		usedTrial: preMembership == 'trial',
 		invoiceNotified: false,
 	};
 	Business.findOne({ name })
@@ -271,8 +162,8 @@ router.post('/', isAuthenticated, async (req, res, next) => {
 			return Business.create(newBuz);
 		})
 		.then(async (business) => {
-			await createNewComisionsConcept(business)
-			await createNewMembershipConcept(business)
+			await createNewComisionsConcept(business);
+			await createNewMembershipConcept(business, membership[0]);
 
 			await business.save();
 
@@ -409,34 +300,82 @@ router.get('/membership/:businessNameEncoded', (req, res, next) => {
 router.put(
 	'/membership/:businessNameEncoded',
 	isAuthenticated,
-	(req, res, next) => {
-		const buzName = req.params.businessNameEncoded.split('-').join(' ');
+	async (req, res, next) => {
+		try {
+			const buzName = req.params.businessNameEncoded.split('-').join(' ');
 
-		const { selectedPlan, usedTrial } = req.body;
+			const { selectedPlan: plan } = req.body;
+			const business = await Business.findOne({ name: buzName });
+			const activeMembership = business.membership.filter(
+				(membership) => membership.status === 'active'
+			)[0];
 
-		const newTrialStatus =
-			usedTrial || selectedPlan === 'trial' ? true : false;
+			const applyNow =
+				activeMembership.plan.rank > membershipData[0][plan].rank;
 
-		const membership = {
-			plan: selectedPlan,
-			updated: new Date(),
-			usedTrial: newTrialStatus,
-		};
+			const isNextPlan = business.membership.filter(
+				(membership) => membership.status === 'nextMonth'
+			)[0];
 
-		Business.findOneAndUpdate(
-			{ name: buzName },
-			{ membership },
-			{ new: true }
-		)
-			.then((business) => {
-				res.status(200).json(business);
-			})
-			.catch((err) => {
-				console.log(err);
-				res.status(500).json({
-					message: 'Sorry internal error occurred',
-				});
+			if (isNextPlan) {
+				business.membership = business.membership.filter(
+					(membership) => membership.status !== 'nextMonth'
+				);
+			}
+
+			business.concepts = business.concepts.filter(
+				(concept) =>
+					concept.code !== 'membership' ||
+					concept.status !== 'notCreated'
+			);
+
+			const newMembership = createNewMembership(
+				business,
+				plan,
+				business.currency
+			);
+
+			business.membership.push(newMembership);
+
+			await createNewMembershipConcept(business, newMembership);
+
+			if (applyNow) {
+				activeMembership.status = 'changed';
+				activeMembership.updated = new Date();
+				// Send email
+				const mailOptions = {
+					from: 'FOODYS APP <info@foodys.app>',
+					to: business.address.email,
+					subject: 'Foodys Membership Updated',
+					html: notificationMembershipChanged(business),
+				};
+
+				await sendMail(mailOptions);
+			} else {
+				// Send email
+				const mailOptions = {
+					from: 'FOODYS APP <info@foodys.app>',
+					to: business.address.email,
+					subject: 'Foodys Membership Update Date',
+					html: notificationMembershipWillChange(business),
+				};
+
+				await sendMail(mailOptions);
+			}
+
+			if (plan == 'trial') {
+				business.usedTrial = true;
+			}
+
+			await business.save();
+
+			res.status(200).json(business);
+		} catch (err) {
+			console.log(err);
+			res.status(500).json({
+				message: 'Sorry internal error occurred',
 			});
+		}
 	}
 );
 
@@ -658,4 +597,49 @@ router.get('/dashboard/:businessNameEncoded', (req, res, next) => {
 		});
 });
 
+router.post(
+	'/payment/:businessNameEncoded',
+	isAuthenticated,
+	async (req, res, next) => {
+
+		//!Verificar que del FE solo vengan los conceptos pagados
+		//!Arreglar el payment en el FE de acuerdo al modelo
+
+		const { invoice } = req.body;
+		const { payment } = req.body.invoice;
+
+		try {
+			const savedPayment = await Payment.create(payment)
+			const savedInvoice = await Invoice.create(invoice);
+
+			invoice.payment = savedPayment._id
+			invoice.concepts.forEach(concept => {
+				concept.status = savedInvoice.status
+				concept.invoice = savedInvoice._id
+				concept.save()
+			});
+			
+			const business = invoice.business;
+			business.invoices.push(savedInvoice._id);
+			business.payments.push(savedPayment._id)
+			business.save()
+			
+			// Send Email
+			const mailOptionsClient = {
+				from: 'FOODYS APP <info@foodys.app>',
+				to: business.address.email,
+				subject: 'Foodys Payment Received',
+				html: notificationPaymentReceived(business),
+			};
+
+			await sendMail(mailOptionsClient);
+
+			res.status(200).json(business);
+
+		} catch (error) {
+			console.log(error);
+			res.status(500).json({ message: 'Sorry internal error occurred' });
+		}
+	}
+);
 module.exports = router;

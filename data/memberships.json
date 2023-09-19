@@ -11,7 +11,8 @@
 			"maxHighlighted":10000000,
 			"monthlySales":100000000000,
 			"ads":false,
-			"payment":["zelle","cash","card","pp","pagoMovil","other"]
+			"payment":["zelle","cash","card","pp","pagoMovil","other"],
+			"rank":0
 		},
 		"free": {
 			"name": "Free",
@@ -24,7 +25,8 @@
 			"maxHighlighted":3,
 			"monthlySales":500,
 			"ads":true,
-			"payment":["zelle","cash","pagoMovil","other"]
+			"payment":["zelle","cash","pagoMovil","other"],
+			"rank":4
 		},
 		"basic": {
 			"name": "Basic",
@@ -37,7 +39,8 @@
 			"maxHighlighted":10,
 			"monthlySales":2000,
 			"ads":false,
-			"payment":["zelle","cash","card","pp","pagoMovil","other"]
+			"payment":["zelle","cash","card","pp","pagoMovil","other"],
+			"rank":3
 		},
 		"premium": {
 			"name": "Premium",
@@ -50,7 +53,8 @@
 			"maxHighlighted":10000000,
 			"monthlySales":100000000000,
 			"ads":false,
-			"payment":["zelle","cash","card","pp","pagoMovil","other"]
+			"payment":["zelle","cash","card","pp","pagoMovil","other"],
+			"rank":1
 		},
 		"menu": {
 			"name": "Menu",
@@ -63,14 +67,16 @@
 			"maxHighlighted":10000000,
 			"monthlySales":10000000,
 			"ads":false,
-			"payment":[]
+			"payment":[],
+			"rank":0
 		},
 		"web": {
 			"name": "MyWeb",
 			"price": {
 				"usd": 85,
 				"eur": 80
-			}
+			},
+			"rank":2
 		},
 		"demo": {
 			"name": "Demo",
@@ -84,6 +90,7 @@
 			"monthlySales":100000000000,
 			"ads":false,
 			"payment":["zelle","cash","card","pp","pagoMovil","other"]
-		}
+		},
+		"rank":0
 	}
 ]

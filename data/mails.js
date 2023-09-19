@@ -613,7 +613,7 @@ function notificationMembershipChanged(business) {
                             <hr/>                                
                             <p>Thank you for being a part of FOODYS APP. We highly value your partnership and eagerly anticipate providing you with a great experience.</p>
                             <h3>Best regards,</h3>
-                            <h3>Foodys App Team</h3>
+                            <h3>Foodys App</h3>
                         </div>
                     </div>
                 </div>
@@ -622,6 +622,137 @@ function notificationMembershipChanged(business) {
     </div>
     `;
 	return mailText;
+}
+
+function notificationMembershipWillChange(business) {
+    const activeMembership = business.membership.find(
+        (membership) => membership.status === 'active'
+    );
+
+    const nextPaymentDate = activeMembership ? activeMembership.membership.dateNextPayment : new Date();
+
+    const mailText = `
+        <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
+            <div>
+                <div style='padding:10px'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
+                        <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
+                        <h1 style='margin-left:15px'>Foodys</h1>
+                    </a>
+                </div>
+                <div style='padding:10px'>
+                    <h1 style='margin-top:3px'>Hi ${business.name},</h1>
+                    <p>We hope this email finds you good.</p>
+                    <div>
+                        <div>
+                            <div>
+                                <hr/>
+                                <h3>We are pleased to inform you that your membership with Foodys will be updated to ${activeMembership ? activeMembership.membership.plan.name : 'the new plan'} on the next billing date (${formatDateToDDMMYYYY(nextPaymentDate)}).</h3>
+                                <p>Your new membership plan will then be in effect, providing you with enhanced features and benefits tailored to meet your business needs.</p>
+                                <br/>  
+                                <p>If you have any questions or require assistance regarding your membership or our services, please feel free to reach out to us. We are here to assist you in any way we can.</p>
+                                <hr/>                                
+                                <p>Thank you for being a part of FOODYS APP. We highly value your partnership and eagerly anticipate providing you with a great experience.</p>
+                                <h3>Best regards,</h3>
+                                <h3>Foodys App</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    return mailText;
+}
+
+// Helper function to format date to DD/MM/YYYY
+function formatDateToDDMMYYYY(date) {
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+}
+function notificationTrialExpiry(business) {
+    const nextBillingDate = business.membership.find(membership => membership.status === 'active').dateNextPayment;
+
+    const mailText = `
+        <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
+            <div>
+                <div style='padding:10px'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
+                        <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
+                        <h1 style='margin-left:15px'>Foodys</h1>
+                    </a>
+                </div>
+                <div style='padding:10px'>
+                    <h1 style='margin-top:3px'>Hi ${business.name},</h1>
+                    <p>We hope this email finds you well.</p>
+                    <div>
+                        <div>
+                            <div>
+                                <hr/>
+                                <h3>Your free trial with Foodys is about to expire.</h3>
+                                <p>If you'd like to continue enjoying all the benefits of a Premium account, please click the button below and upgrade to the Premium Plan before your next billing date (${formatDateToDDMMYYYY(nextBillingDate)}).</p>
+                                <br/>  
+                                <p>If you choose not to upgrade, your account will be automatically downgraded to the Free Plan after the trial period ends.</p>
+                                <hr/>                                
+                                <div>
+                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/memberships/${business.name.split(' ').join('-')}', '_blank')'>Upgrade to Premium</button>
+                                </div>
+                                <br/>
+                                <p>Thank you for using FOODYS APP. We're excited to have you with us!</p>
+                                <h3>Best regards,</h3>
+                                <h3>Foodys App Team</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    return mailText;
+}
+
+function notificationPaymentReceived(business) {
+    const mailText = `
+        <div style='background-image: linear-gradient(to right,#F1FAFF, #8EEDFF); width:85%; margin:auto'>
+            <div>
+                <div style='padding:10px'>
+                    <a href='https://www.foodys.app/' style='display:flex; text-decoration: none'>
+                        <img src='https://res.cloudinary.com/dwtnqtdcs/image/upload/v1665012984/foodie-gallery/Imagen1_lpv17v.png' width="60px" height="60px"/>
+                        <h1 style='margin-left:15px'>Foodys</h1>
+                    </a>
+                </div>
+                <div style='padding:10px'>
+                    <h1 style='margin-top:3px'>Hi ${business.name},</h1>
+                    <p>We hope this email finds you well.</p>
+                    <div>
+                        <div>
+                            <div>
+                                <hr/>
+                                <h3>Your Payment was successfully received.</h3>
+                                <p>If you wish to review the details of your recent payments or any previous transactions, you can always access your account on our platform. Simply log in to your account and navigate to the 'Payment History' section to view all the relevant information.</p>
+                                <hr/>                                
+                                <div>
+                                    <button style='background-color: #0d6efd; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer' onclick='window.open('https://www.foodys.app/payments/${business.name.split(' ').join('-')}', '_blank')'>Go to Payments</button>
+                                </div>
+                                <br/>
+                                <p>Your continued support and trust in our services are greatly appreciated. If you have any questions or concerns, please feel free to reach out to our customer support team. We are here to assist you.</p>
+                                <br/>
+                                <p>Thank you for using FOODYS APP. We're excited to have you with us!</p>
+                                <h3>Best regards,</h3>
+                                <h3>Foodys App Team</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    return mailText;
 }
 
 //AGREGAR NUEVA FUNCION Y RECORDAR EXPORTARLA
@@ -639,5 +770,8 @@ module.exports = {
     infoNewUser,
     accountInactiveInvoicePayment,
     notificationNewInvoice,
-    notificationMembershipChanged
+    notificationMembershipChanged,
+    notificationMembershipWillChange,
+    notificationTrialExpiry,
+    notificationPaymentReceived
 };

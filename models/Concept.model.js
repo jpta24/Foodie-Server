@@ -6,6 +6,10 @@ const conceptSchema = new Schema(
 			type: Schema.Types.ObjectId,
 			ref: 'Business',
 		},
+		Invoice: {
+			type: Schema.Types.ObjectId,
+			ref: 'Invoice',
+		},
 		code: String,
 		concept: String,
 		description: String,

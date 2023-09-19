@@ -88,6 +88,7 @@ const businessSchema = new Schema(
 					monthlySales: Number,
 					ads: false,
 					payment: [String],
+					rank:Number
 				},
 				updated: Date,
 				dateStart: Date,
